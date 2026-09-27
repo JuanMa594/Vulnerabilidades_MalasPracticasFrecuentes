@@ -23,4 +23,41 @@
 <div class="resultado">{{ mensaje }}
 ¿Reconocido como admin?: {{ "sí" if es_admin else "no" }}</div>
 {% endif %}
+
+<section class="explica">
+  <h3>Qué está mal</h3>
+  <p>Se compara un secreto con <code>==</code> y un valor con <code>is</code>.</p>
+  {% raw %}<pre class="codigo-bloque">if password == guardado:        # secreto comparado con ==
+    es_admin = rol is "admin"    # 'is' compara identidad, no valor</pre>{% endraw %}
+
+  <h3>Qué pasa por debajo</h3>
+  <p><strong><code>==</code> en contraseñas/tokens:</strong> compara carácter por carácter y se
+  detiene en el primero que no coincide, así que tarda un poquito más cuantos más aciertas. Midiendo
+  ese tiempo se puede adivinar el secreto letra por letra (<em>timing attack</em>).</p>
+  <p><strong><code>is</code> en vez de <code>==</code>:</strong> <code>is</code> pregunta "¿son el
+  mismo objeto?", no "¿valen lo mismo?". El <code>rol</code> viene de la base como un texto nuevo,
+  distinto objeto que el literal <code>"admin"</code>, así que <code>rol is "admin"</code> casi
+  siempre da False: funciona solo por casualidad cuando Python reutiliza el objeto.</p>
+
+  <h3>Cómo verlo <span class="donde">pgAdmin + página + logs</span></h3>
+  <ol>
+    <li>En pgAdmin, mira lo que se compara con <code>==</code>:
+      {% raw %}<pre class="codigo-bloque">SELECT nombre, password, rol FROM usuarios;</pre>{% endraw %}</li>
+    <li>En la demo, entra como <code>admin</code>: dice "Sesión iniciada" pero "¿admin?: no". La
+      autorización se rompió por el <code>is</code>.</li>
+    <li>Python mismo lo advierte al arrancar; míralo en los logs:
+      {% raw %}<pre class="codigo-bloque">rtk docker compose -f inseguro/compose.yml --env-file inseguro/.env.example logs web | grep SyntaxWarning</pre>{% endraw %}</li>
+  </ol>
+
+  <h3>Qué tan grave es <span class="sev sev-alta">Alta</span></h3>
+  <p>El <code>==</code> puede filtrar secretos por tiempo; el <code>is</code> hace que la
+  autenticación/autorización funcione "a veces". Ambos rompen el control de acceso.</p>
+
+  <h3>Cómo se arregla</h3>
+  <div class="arreglo"><code>hmac.compare_digest(a, b)</code> para secretos (tarda lo mismo aciertes
+  o no), y <code>==</code> para comparar valores como el rol.
+  {% raw %}<pre class="codigo-bloque">import hmac
+if hmac.compare_digest(password, guardado):
+    es_admin = rol == "admin"</pre>{% endraw %}</div>
+</section>
 {% endblock %}

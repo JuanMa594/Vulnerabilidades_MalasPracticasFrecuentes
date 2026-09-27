@@ -171,6 +171,66 @@ h1 { font-size: 1.6rem; }
 .producto .stock { font-size: 0.75rem; color: var(--tenue); }
 .producto .stock-bajo { color: #fca5a5; font-weight: 700; }
 
+/* Panel de explicación autocontenida en cada demo */
+.explica {
+  margin-top: 2rem;
+  padding: 1.2rem 1.4rem;
+  background: #0b1220;
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+}
+.explica h3 {
+  font-size: 1rem;
+  margin: 1.3rem 0 0.4rem;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+.explica h3:first-of-type { margin-top: 0; }
+.explica p, .explica li { color: #cbd5e1; font-size: 0.9rem; }
+.explica ol, .explica ul { padding-left: 1.2rem; }
+.explica code { color: #fca5a5; }
+.codigo-bloque {
+  background: #05080f;
+  border: 1px solid var(--borde);
+  border-left: 3px solid var(--rojo);
+  border-radius: 8px;
+  padding: 0.8rem 1rem;
+  overflow-x: auto;
+  font-family: ui-monospace, monospace;
+  font-size: 0.82rem;
+  color: #e2e8f0;
+  white-space: pre;
+  margin: 0.3rem 0;
+}
+.donde {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--acento);
+  border: 1px solid var(--acento);
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+}
+.sev {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.12rem 0.55rem;
+  border-radius: 999px;
+}
+.sev-critica { background: var(--rojo); color: #fff; }
+.sev-alta { background: #f97316; color: #fff; }
+.sev-media { background: #eab308; color: #1a1400; }
+.arreglo {
+  margin-top: 0.4rem;
+  border-left: 3px solid var(--verde);
+  padding: 0.6rem 0.9rem;
+  background: rgba(34, 197, 94, 0.08);
+  border-radius: 8px;
+}
+
 code {
   font-family: ui-monospace, monospace;
   background: #0b1220;

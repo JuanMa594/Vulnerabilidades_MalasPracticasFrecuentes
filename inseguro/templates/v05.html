@@ -30,4 +30,32 @@
 <p>Objeto que devolvió <code>pickle.loads()</code>:</p>
 <div class="resultado">{{ objeto }}</div>
 {% endif %}
+
+<section class="explica">
+  <h3>Qué está mal</h3>
+  <p>Se deserializan con pickle datos que llegan de afuera.</p>
+  {% raw %}<pre class="codigo-bloque">objeto = pickle.loads(base64.b64decode(datos))   # 'datos' viene del usuario</pre>{% endraw %}
+
+  <h3>Qué pasa por debajo</h3>
+  <p>Al deserializar, pickle reconstruye objetos y para eso puede <strong>llamar funciones</strong>
+  (método <code>__reduce__</code>). El carrito de ataque fue preparado para que, al reconstruirse,
+  ejecute <code>subprocess.check_output(['id'])</code>: corre el comando y el "objeto" resultante es
+  su salida. Es decir, el código corre <em>antes</em> de que veas ningún carrito.</p>
+
+  <h3>Cómo verlo <span class="donde">la página + el contenedor</span></h3>
+  <ol>
+    <li>Pega el carrito de ataque (2) y restaura: la página muestra <code>uid=1000(app)...</code>,
+      la salida real del comando.</li>
+    <li>Un payload podría dejar rastro (crear un archivo). Revisa dentro del contenedor:
+      {% raw %}<pre class="codigo-bloque">rtk docker compose -f inseguro/compose.yml --env-file inseguro/.env.example exec web ls -l /tmp</pre>{% endraw %}</li>
+  </ol>
+
+  <h3>Qué tan grave es <span class="sev sev-critica">Crítica</span></h3>
+  <p>Ejecución de código con solo enviar datos. Aparece cada vez que se aceptan objetos serializados
+  (cookies, colas, archivos "de configuración") de origen no confiable.</p>
+
+  <h3>Cómo se arregla</h3>
+  <div class="arreglo">No usar pickle con datos externos. Usar un formato que solo describe datos,
+  como JSON: <code>json.loads(datos)</code> nunca ejecuta código, solo lee valores.</div>
+</section>
 {% endblock %}

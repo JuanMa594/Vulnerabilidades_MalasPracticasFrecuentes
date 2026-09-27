@@ -31,7 +31,7 @@ DEMOS = [
     {
         "codigo": "V01",
         "titulo": 'Sin if __name__ == "__main__"',
-        "ruta": None,  # No es una página: es un fallo de la estructura del archivo.
+        "ruta": "/v01",
         "resumen": "Importar este archivo ya arranca el servidor: falta la guardia.",
         "implementado": True,
     },
@@ -139,6 +139,12 @@ def index():
 def lecciones():
     """Menú de las demos de vulnerabilidades (modo clase)."""
     return render_template("lecciones.html", demos=DEMOS)
+
+
+@app.route("/v01")
+def v01_sin_main():
+    """V01 — Fallo de estructura del archivo; sin demo interactiva, solo se explica."""
+    return render_template("v01.html")
 
 
 @app.route("/v03")

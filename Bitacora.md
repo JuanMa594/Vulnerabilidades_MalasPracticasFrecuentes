@@ -5,6 +5,40 @@ Registro de lo que se hace en cada sesión, por qué se hizo así y qué queda p
 
 ---
 
+## 2026-09-27 · Sesión 19: cada demo autocontenida (qué pasa, cómo verlo, gravedad)
+
+### Qué se hizo
+
+Cada página de vulnerabilidad ahora incluye un panel de explicación con secciones fijas: **Qué está
+mal** (el código), **Qué pasa por debajo**, **Cómo verlo** (con la etiqueta de dónde: pgAdmin, logs
+del contenedor, archivos o la propia página), **Qué tan grave es** (etiqueta Crítica/Alta/Media) y
+**Cómo se arregla** (adelanto de la versión segura). La idea es que cada caso sea autocontenido y se
+sienta serio.
+
+- Se le dio página propia a **V01** (`/v01`), que antes solo se mencionaba: explica el fallo y cómo
+  verlo en los logs del contenedor.
+- **V04** gana un golpe de efecto verificado: un `UNION` que **roba las contraseñas** de la tabla
+  `usuarios` y las muestra en la grilla de productos. Payload probado contra la app:
+  `zzz' UNION SELECT id, nombre, password, rol, 0, 0, '' FROM usuarios --`.
+- CSS nuevo para el panel (`.explica`, `.codigo-bloque`, `.sev-*`, `.donde`, `.arreglo`).
+
+### Detalle técnico
+
+Los bloques de código en las plantillas van dentro de `{% raw %}...{% endraw %}` para que Jinja no
+intente interpretar las llaves de los f-strings ni los `%s`. Verificado: las 9 páginas responden 200,
+todas traen el panel y la sección "Cómo verlo", y no se fuga sintaxis de Jinja al HTML.
+
+### Dónde se observa cada vulnerabilidad (resumen para clase)
+
+- pgAdmin: **V04** (inyección y robo de `usuarios`), **V07** (el precio no cambia), **V09** (ver las
+  contraseñas comparadas con `==`).
+- Logs del contenedor: **V01** (efecto al importar), **V09** (SyntaxWarning de Python).
+- La propia página / el contenedor: **V02**, **V05** (salida de `id`), **V06** (`/etc/passwd`),
+  **V08** (la lista que crece).
+- Terminal/git: **V03** (`grep` y `git log -p`).
+
+---
+
 ## 2026-09-27 · Sesión 18: arreglo de pgAdmin (correo con dominio válido)
 
 - pgAdmin se caía (Exited 1): rechazaba `admin@demo.local` porque `.local` es un dominio reservado

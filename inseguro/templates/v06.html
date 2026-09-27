@@ -30,4 +30,32 @@
 <p>Contenido del archivo:</p>
 <div class="resultado">{{ contenido }}</div>
 {% endif %}
+
+<section class="explica">
+  <h3>Qué está mal</h3>
+  <p>La ruta se arma concatenando el nombre que dio el usuario, sin validar.</p>
+  {% raw %}<pre class="codigo-bloque">ruta = f"{FICHAS_DIR}/{nombre}"   # 'nombre' viene del usuario
+open(ruta)</pre>{% endraw %}
+
+  <h3>Qué pasa por debajo</h3>
+  <p><code>..</code> significa "carpeta de arriba". Con <code>../../../etc/passwd</code> se sale del
+  directorio de fichas y se sube hasta la raíz, para abrir cualquier archivo que el proceso pueda
+  leer. La app creía que solo servía fichas de productos.</p>
+
+  <h3>Cómo verlo <span class="donde">la página</span></h3>
+  <ol>
+    <li>Escribe <code>../../../etc/passwd</code>: verás el archivo de usuarios del sistema. Arriba se
+      muestra la ruta que realmente se abrió.</li>
+    <li>Lee el propio código de la app: <code>../app.py</code> (incluye el secreto de V03).</li>
+  </ol>
+
+  <h3>Qué tan grave es <span class="sev sev-alta">Alta</span></h3>
+  <p>Lectura de archivos arbitrarios: código fuente, configuraciones, claves. Muchas veces es el
+  primer paso para encontrar otro fallo mayor.</p>
+
+  <h3>Cómo se arregla</h3>
+  <div class="arreglo">Validar que la ruta final quede dentro de la carpeta permitida: resolver la
+  ruta real (<code>os.path.realpath</code>) y comprobar que empiece por <code>FICHAS_DIR</code>, o
+  aceptar solo nombres de una lista blanca.</div>
+</section>
 {% endblock %}
