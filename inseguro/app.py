@@ -73,9 +73,9 @@ DEMOS = [
     {
         "codigo": "V07",
         "titulo": "except demasiado amplio",
-        "ruta": None,
+        "ruta": "/v07",
         "resumen": "Tragarse cualquier error con except: pass.",
-        "implementado": False,
+        "implementado": True,
     },
     {
         "codigo": "V08",
@@ -201,6 +201,35 @@ def v05_deserializacion():
         except Exception as exc:
             error = f"{type(exc).__name__}: {exc}"
     return render_template("v05.html", datos=datos, objeto=objeto, error=error)
+
+
+@app.route("/v07", methods=["GET", "POST"])
+def v07_except_amplio():
+    """V07 — Cambiar el precio de un producto; el error lo traga un except amplio."""
+    mensaje = ""
+    if request.method == "POST":
+        sku = request.form.get("sku", "")
+        nuevo = request.form.get("precio", "")
+        # VULNERABLE V07 (except demasiado amplio): cualquier error queda tragado por
+        # `except: pass`. Si el precio no es un número, o la base falla, la página
+        # igual dice "guardado" y nadie se entera de que no se guardó nada.
+        try:
+            precio = float(nuevo)
+            with conectar() as con, con.cursor() as cur:
+                cur.execute(
+                    "UPDATE productos SET precio = %s WHERE sku = %s", (precio, sku)
+                )
+        except:  # noqa: E722, S110
+            pass
+        mensaje = "Precio actualizado."  # se muestra pase lo que pase
+    productos = []
+    try:
+        with conectar() as con, con.cursor() as cur:
+            cur.execute("SELECT sku, nombre, precio FROM productos ORDER BY sku")
+            productos = cur.fetchall()
+    except psycopg.Error:
+        pass
+    return render_template("v07.html", mensaje=mensaje, productos=productos)
 
 
 # ---------------------------------------------------------------------------

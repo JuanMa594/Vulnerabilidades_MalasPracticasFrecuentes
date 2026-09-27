@@ -5,6 +5,16 @@ Registro de lo que se hace en cada sesión, por qué se hizo así y qué queda p
 
 ---
 
+## 2026-09-27 · Sesión 13: V07 (except demasiado amplio) en la app insegura
+
+- Ruta `/v07`: cambia el precio de un producto; el error se traga con `except: pass`
+  (`# VULNERABLE V07`, `# noqa: E722, S110`). Plantilla `v07.html` con la tabla de precios para ver
+  la mentira.
+- Demo: precio `30000` cambia; precio `abc` no cambia, pero la página igual dice "Precio actualizado".
+  El UPDATE usa consulta parametrizada (no se mezcla con V04). ruff y ty pasan.
+
+---
+
 ## 2026-09-27 · Sesión 12: V06 (path traversal) en la app insegura
 
 - Ruta `/v06`: abre la ficha técnica cuyo nombre da el usuario, armando la ruta por concatenación
