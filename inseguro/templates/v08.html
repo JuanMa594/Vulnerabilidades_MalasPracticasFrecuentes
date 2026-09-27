@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block titulo %}V08 · Mutable por defecto{% endblock %}
+
+{% block contenido %}
+<p><a class="volver" href="{{ url_for('index') }}">← Volver al inicio</a></p>
+<h1>V08 · Cotización temporal <span class="codigo">Mutable por defecto</span></h1>
+
+<p class="intro">
+  Agrega un producto a una cotización que <strong>debería empezar vacía</strong> en cada visita.
+  Pero la función usa <code>cotizacion=[]</code> como valor por defecto, y esa lista se comparte
+  entre llamadas. Agrega <code>martillo</code>, luego <code>taladro</code>, y verás que la lista
+  crece en vez de reiniciarse.
+</p>
+
+<form class="demo-form" method="get" action="{{ url_for('v08_mutable_default') }}">
+  <input type="text" name="item" placeholder="martillo" autofocus>
+  <button class="boton" type="submit">Agregar a la cotización</button>
+</form>
+
+{% if item %}
+<p>Cotización que devolvió el backend:</p>
+<div class="resultado">{{ cotizacion }}</div>
+<p class="nota">Debería tener solo <code>{{ item }}</code>. Si tiene más, son de peticiones anteriores.</p>
+{% endif %}
+{% endblock %}

@@ -80,9 +80,9 @@ DEMOS = [
     {
         "codigo": "V08",
         "titulo": "Mutable por defecto",
-        "ruta": None,
+        "ruta": "/v08",
         "resumen": "Una lista como valor por defecto que se comparte entre llamadas.",
-        "implementado": False,
+        "implementado": True,
     },
     {
         "codigo": "V09",
@@ -230,6 +230,25 @@ def v07_except_amplio():
     except psycopg.Error:
         pass
     return render_template("v07.html", mensaje=mensaje, productos=productos)
+
+
+# VULNERABLE V08 (mutable por defecto): `cotizacion=[]` se crea UNA sola vez, al
+# definir la función, y se comparte entre TODAS las llamadas. Cada petición agrega a
+# la misma lista, así que una cotización "nueva" arrastra los ítems de las anteriores
+# (incluso de otras personas). Lo correcto está en `seguro/app.py`.
+def agregar_a_cotizacion(item, cotizacion=[]):  # noqa: B006
+    cotizacion.append(item)
+    return cotizacion
+
+
+@app.route("/v08")
+def v08_mutable_default():
+    """V08 — Agregar un producto a una cotización que debería empezar vacía."""
+    item = request.args.get("item", "")
+    cotizacion = []
+    if item:
+        cotizacion = agregar_a_cotizacion(item)
+    return render_template("v08.html", item=item, cotizacion=cotizacion)
 
 
 # ---------------------------------------------------------------------------

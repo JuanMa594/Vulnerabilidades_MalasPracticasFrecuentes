@@ -5,6 +5,15 @@ Registro de lo que se hace en cada sesión, por qué se hizo así y qué queda p
 
 ---
 
+## 2026-09-27 · Sesión 14: V08 (mutable por defecto) en la app insegura
+
+- Ruta `/v08` + función `agregar_a_cotizacion(item, cotizacion=[])` (`# VULNERABLE V08`,
+  `# noqa: B006`). Plantilla `v08.html`.
+- Demo: agregar `martillo` y luego `taladro`; la cotización crece en vez de reiniciarse porque la
+  lista por defecto se comparte entre peticiones. ruff (B006) y ty pasan.
+
+---
+
 ## 2026-09-27 · Sesión 13: V07 (except demasiado amplio) en la app insegura
 
 - Ruta `/v07`: cambia el precio de un producto; el error se traga con `except: pass`
