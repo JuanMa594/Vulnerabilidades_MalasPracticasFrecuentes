@@ -5,6 +5,41 @@ Registro de lo que se hace en cada sesión, por qué se hizo así y qué queda p
 
 ---
 
+## 2026-09-27 · Sesión 4: cómo enseña la demo (lado a lado + comprobación)
+
+### Qué se hizo
+
+- En [CLAUDE.md](CLAUDE.md) se agregaron dos secciones:
+  - **"Cómo enseña la demo"**: el mismo servicio corre dos veces a la vez, la versión insegura y la
+    segura, en puertos distintos de `127.0.0.1`. Para cada `Vxx` la clase hace tres pasos: explotar
+    en la insegura, repetir lo mismo en la segura (ya no funciona) y comparar los dos códigos.
+  - **"Pruebas"**: cada `Vxx` tiene una prueba que corre el mismo intento contra las dos versiones;
+    debe funcionar en la insegura y fallar en la segura.
+- Se agregó `tests/` a la estructura planeada.
+- El skill `/nueva-vulnerabilidad` ahora incluye un paso para crear esa prueba comparativa.
+
+### Por qué así
+
+**La comprobación es la lección, no un adorno.** Enseñar solo la versión arreglada obliga al
+estudiante a creer que ya está bien. Al repetir el mismo ataque contra la versión segura y verlo
+fallar, la corrección se demuestra en vez de afirmarse. Por eso la prueba de cada `Vxx` afirma las
+dos cosas: en la insegura el intento **funciona** (si dejara de funcionar, el ejemplo se rompió) y
+en la segura **falla** (si funcionara, el arreglo no sirve).
+
+**Mismo servicio, dos puertos.** Las dos versiones comparten pantallas y rutas para que la única
+diferencia visible sea el comportamiento ante el ataque, y la única diferencia en el código sea la
+línea corregida (`git diff --no-index inseguro seguro`).
+
+**Sigue siendo todo local.** Los dos puertos se publican en `127.0.0.1` y las pruebas solo apuntan a
+los contenedores de este proyecto: la Sesión 3 se mantiene sin excepciones.
+
+### Pendiente
+
+- Elegir backend (Sesión 1) para poder escribir la primera prueba comparativa real.
+- Decidir con qué se corren las pruebas: `pytest` es lo previsto en los permisos de `settings.json`.
+
+---
+
 ## 2026-09-27 · Sesión 3: la demo nunca sale de esta máquina
 
 ### Qué se hizo

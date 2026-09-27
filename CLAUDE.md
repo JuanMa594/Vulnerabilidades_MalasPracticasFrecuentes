@@ -33,12 +33,36 @@ explota cada mala práctica y cómo se arregla. La idea original está en `idea_
 - Frontend: _pendiente_
 - Docker: un `Dockerfile` por app y un `compose.yml` en la raíz
 
+## Cómo enseña la demo
+Es una app real, no fragmentos sueltos. El mismo servicio corre **dos veces al mismo tiempo**, en
+puertos distintos de `127.0.0.1`:
+
+- **Versión insegura** (p. ej. `127.0.0.1:8001`): tiene los fallos del catálogo a propósito.
+- **Versión segura** (p. ej. `127.0.0.1:8002`): mismas pantallas y mismas rutas, con las buenas prácticas.
+
+Para cada vulnerabilidad, la clase sigue tres pasos:
+1. **Se explota en la versión insegura** y se ve el daño (leer datos ajenos, ejecutar un comando, etc.).
+2. **Se repite exactamente lo mismo contra la versión segura** y ya no funciona.
+3. Se comparan los dos códigos (`git diff --no-index inseguro seguro`) para ver qué línea cambió.
+
+El paso 2 es lo importante: el estudiante ve que la misma acción falla, no le pedimos que confíe en
+que "ahora está arreglado". Esa comprobación se guarda como una prueba automatizada (ver "Pruebas").
+
+## Pruebas
+Cada vulnerabilidad `Vxx` tiene una prueba que corre el mismo intento contra las dos versiones:
+- contra la insegura **debe funcionar** (si dejara de funcionar, el ejemplo se rompió);
+- contra la segura **debe fallar** (si funcionara, la corrección no sirve).
+
+Así, una sola orden demuestra ante la clase que cada arreglo cierra de verdad su fallo. Las pruebas
+solo apuntan a los contenedores locales de este proyecto.
+
 ## Estructura (planeada, aún no existe)
 ```text
 inseguro/        app vulnerable a propósito, con su Dockerfile
 seguro/          la misma app corregida: mismos archivos, funciones y rutas
 docs/vulns/      una ficha por vulnerabilidad para los estudiantes
-compose.yml      postgres, pgadmin, app insegura y app segura
+tests/           una prueba por Vxx: funciona en inseguro, falla en seguro
+compose.yml      postgres, pgadmin, app insegura y app segura (todo en 127.0.0.1)
 .env.example     variables necesarias, sin valores reales
 ```
 
