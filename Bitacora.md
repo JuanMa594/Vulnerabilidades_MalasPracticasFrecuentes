@@ -5,6 +5,22 @@ Registro de lo que se hace en cada sesión, por qué se hizo así y qué queda p
 
 ---
 
+## 2026-09-27 · Sesión 15: V09 (comparaciones inseguras) — app insegura COMPLETA
+
+- Ruta `/v09`: login que compara la contraseña con `==` (timing) y el rol con `is`
+  (`# VULNERABLE V09`, `# noqa: F632`). Plantilla `v09.html`.
+- Demo: entrar como `admin` inicia sesión, pero `rol is "admin"` da False (el str viene de la base,
+  no es el mismo objeto que el literal), así que no lo reconoce como admin: `is` "funciona por
+  casualidad". El arreglo será `==` para el rol y `hmac.compare_digest` para la contraseña.
+- **Con esto, la app insegura tiene las 9 vulnerabilidades (V01–V09).** ruff y ty pasan.
+
+### Estado del proyecto
+
+- Falta: levantar con `docker compose up` y comprobar cada demo a mano; luego duplicar en `seguro/`
+  y corregir cada fallo; después las pruebas por `Vxx` y las fichas de `docs/vulns/`.
+
+---
+
 ## 2026-09-27 · Sesión 14: V08 (mutable por defecto) en la app insegura
 
 - Ruta `/v08` + función `agregar_a_cotizacion(item, cotizacion=[])` (`# VULNERABLE V08`,

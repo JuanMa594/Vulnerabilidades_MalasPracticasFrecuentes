@@ -87,9 +87,9 @@ DEMOS = [
     {
         "codigo": "V09",
         "titulo": "Comparaciones inseguras",
-        "ruta": None,
+        "ruta": "/v09",
         "resumen": "Comparar tokens con == o strings con is.",
-        "implementado": False,
+        "implementado": True,
     },
 ]
 
@@ -249,6 +249,39 @@ def v08_mutable_default():
     if item:
         cotizacion = agregar_a_cotizacion(item)
     return render_template("v08.html", item=item, cotizacion=cotizacion)
+
+
+@app.route("/v09", methods=["GET", "POST"])
+def v09_comparaciones():
+    """V09 — Iniciar sesión en la caja: compara la contraseña y decide si es admin."""
+    mensaje = ""
+    es_admin = False
+    if request.method == "POST":
+        usuario = request.form.get("usuario", "")
+        password = request.form.get("password", "")
+        fila = None
+        try:
+            with conectar() as con, con.cursor() as cur:
+                cur.execute(
+                    "SELECT password, rol FROM usuarios WHERE nombre = %s", (usuario,)
+                )
+                fila = cur.fetchone()
+        except psycopg.Error as exc:
+            mensaje = f"{type(exc).__name__}: {exc}"
+        if fila is not None:
+            guardado, rol = fila
+            # VULNERABLE V09 (comparar con ==): comparar la contraseña con == deja
+            # ver, por el tiempo que tarda, cuántos caracteres coinciden (timing
+            # attack). Lo correcto es hmac.compare_digest (tiempo constante).
+            if password == guardado:
+                # VULNERABLE V09 (is en vez de ==): `is` compara identidad de objetos,
+                # no valor. El rol viene de la base como un str nuevo, así que
+                # `rol is "admin"` funciona solo por casualidad: casi siempre da False.
+                es_admin = rol is "admin"  # noqa: F632
+                mensaje = "Sesión iniciada."
+            elif not mensaje:
+                mensaje = "Usuario o contraseña incorrectos."
+    return render_template("v09.html", mensaje=mensaje, es_admin=es_admin)
 
 
 # ---------------------------------------------------------------------------

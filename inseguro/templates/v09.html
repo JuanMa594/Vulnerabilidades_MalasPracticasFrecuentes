@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block titulo %}V09 · Comparaciones inseguras{% endblock %}
+
+{% block contenido %}
+<p><a class="volver" href="{{ url_for('index') }}">← Volver al inicio</a></p>
+<h1>V09 · Iniciar sesión <span class="codigo">Comparaciones inseguras</span></h1>
+
+<p class="intro">
+  Inicia sesión en la caja. El backend hace dos comparaciones mal:
+  la contraseña con <code>==</code> (deja medir por tiempo cuántos caracteres aciertas) y el rol con
+  <code>is</code> (compara identidad, no valor). Entra con <code>admin</code> /
+  <code>admin-secreto-demo</code>: verás que la sesión inicia pero <strong>no te reconoce como
+  admin</strong>, porque <code>rol is "admin"</code> falla aunque el rol sea "admin".
+</p>
+
+<form class="demo-form" method="post" action="{{ url_for('v09_comparaciones') }}">
+  <input type="text" name="usuario" placeholder="admin" autofocus>
+  <input type="text" name="password" placeholder="admin-secreto-demo">
+  <button class="boton" type="submit">Entrar</button>
+</form>
+
+{% if mensaje %}
+<div class="resultado">{{ mensaje }}
+¿Reconocido como admin?: {{ "sí" if es_admin else "no" }}</div>
+{% endif %}
+{% endblock %}
