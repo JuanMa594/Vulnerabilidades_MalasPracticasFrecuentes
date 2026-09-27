@@ -5,6 +5,17 @@ Registro de lo que se hace en cada sesión, por qué se hizo así y qué queda p
 
 ---
 
+## 2026-09-27 · Sesión 18: arreglo de pgAdmin (correo con dominio válido)
+
+- pgAdmin se caía (Exited 1): rechazaba `admin@demo.local` porque `.local` es un dominio reservado
+  y su validador de correo no lo acepta. Se cambió `PGADMIN_EMAIL` a `admin@ferreteria.com` (falso
+  pero con formato válido) en `inseguro/.env.example`. Ahora los tres contenedores quedan arriba.
+- Acceso: pgAdmin en http://127.0.0.1:5051 (correo `admin@ferreteria.com`, clave `pgadmin_de_demo`).
+  Dentro de pgAdmin, para conectar al servidor: host `db`, puerto 5432, base `demo`, usuario `demo`,
+  clave `clave_de_demo` (Postgres no publica puerto: se llega por la red interna de Docker).
+
+---
+
 ## 2026-09-27 · Sesión 17: front realista de la ferretería (catálogo con fotos)
 
 ### Qué se hizo
