@@ -37,8 +37,8 @@ explota cada mala práctica y cómo se arregla. La idea original está en `idea_
 Es una app real, no fragmentos sueltos. El mismo servicio corre **dos veces al mismo tiempo**, en
 puertos distintos de `127.0.0.1`:
 
-- **Versión insegura** (p. ej. `127.0.0.1:8001`): tiene los fallos del catálogo a propósito.
-- **Versión segura** (p. ej. `127.0.0.1:8002`): mismas pantallas y mismas rutas, con las buenas prácticas.
+- **Versión insegura** (`127.0.0.1:8011`): tiene los fallos del catálogo a propósito.
+- **Versión segura** (`127.0.0.1:8012`): mismas pantallas y mismas rutas, con las buenas prácticas.
 
 Para cada vulnerabilidad, la clase sigue tres pasos:
 1. **Se explota en la versión insegura** y se ve el daño (leer datos ajenos, ejecutar un comando, etc.).
@@ -72,8 +72,9 @@ tests/           una prueba por Vxx: funciona contra inseguro, falla contra segu
 pyproject.toml   dependencias y herramientas (raíz, compartido)
 ```
 Cada versión tiene **su propio `compose.yml`** y su propia base de datos: se levantan por separado
-y no comparten nada. Puertos: inseguro Flask `8001` / pgAdmin `5051`; seguro Flask `8002` /
-pgAdmin `5052`. Postgres no publica puertos (se llega por la red interna de Docker).
+y no comparten nada. Puertos: inseguro Flask `8011` / pgAdmin `5051`; seguro Flask `8012` /
+pgAdmin `5052` (8001 y 8002 estaban ocupados por otros proyectos de esta máquina). Postgres no
+publica puertos (se llega por la red interna de Docker).
 
 ## Catálogo de vulnerabilidades
 El código `Vxx` se usa en comentarios, rutas y documentos.
@@ -102,9 +103,10 @@ rtk uv run ty check          # tipos
 Los tres últimos deben pasar antes de cada commit. `rtk ruff` directo no sirve: ruff vive en el entorno del proyecto.
 
 ```bash
-rtk docker compose -f inseguro/compose.yml up --build   # levanta la app insegura
-rtk docker compose -f seguro/compose.yml up --build      # levanta la app segura
-rtk docker compose -f inseguro/compose.yml config        # valida el compose sin levantar nada
+# El .env lo crea la persona (Claude lo tiene denegado). Alternativa: --env-file .env.example
+rtk docker compose -f inseguro/compose.yml --env-file inseguro/.env.example up -d --build
+# app en http://127.0.0.1:8011 · pgAdmin en http://127.0.0.1:5051
+rtk docker compose -f inseguro/compose.yml --env-file inseguro/.env.example down
 ```
 
 ## Decisiones tomadas

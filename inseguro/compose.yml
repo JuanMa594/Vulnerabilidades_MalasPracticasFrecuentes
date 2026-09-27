@@ -16,7 +16,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "127.0.0.1:8001:8000"
+      - "127.0.0.1:8011:8000"
     depends_on:
       db:
         condition: service_healthy
@@ -29,7 +29,8 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
-      - db-data:/var/lib/postgresql/data
+      # Postgres 18 guarda los datos en un subdirectorio: se monta en /var/lib/postgresql.
+      - db-data:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s

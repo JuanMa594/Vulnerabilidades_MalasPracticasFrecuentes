@@ -5,6 +5,39 @@ Registro de lo que se hace en cada sesión, por qué se hizo así y qué queda p
 
 ---
 
+## 2026-09-27 · Sesión 16: se levanta la app insegura y se verifican las 9 en vivo
+
+### Qué se hizo
+
+Se levantó `inseguro/compose.yml` con Docker y se comprobó con `curl` que **cada demo funciona de
+verdad**. Las 9 vulnerabilidades quedaron confirmadas (SQL injection devuelve los 7 productos,
+`eval` y `pickle` ejecutan `id`, path traversal lee `/etc/passwd`, el `except` miente, la cotización
+acumula, el login admin no se reconoce como admin). El comando `id` corrió como `uid=1000(app)`, no
+root: la contención del contenedor funcionó.
+
+### Dos arreglos que hicieron falta
+
+1. **Postgres 18 cambió la ruta de datos.** El contenedor `db` se caía con "these Docker images are
+   configured to store database data in a format...". En 18+ el volumen se monta en
+   `/var/lib/postgresql` (no en `/var/lib/postgresql/data`). Corregido en `inseguro/compose.yml`.
+2. **Puertos 8001/8002 ocupados.** Otros proyectos de esta máquina (`neurofuzzy-ems`,
+   `neurofuzzy-estudio`) ya usaban 8001 y 8002. La app insegura pasó a **8011** (pgAdmin 5051); la
+   segura irá a **8012** (pgAdmin 5052). Actualizado en `CLAUDE.md`.
+
+### Nota de método
+
+Pasar comandos con comillas y variables a través de `wsl zsh -ic "..."` es frágil (las variables
+llegaban vacías). Lo que funcionó: escribir el script de prueba en un archivo y ejecutarlo con
+`wsl bash`. El `.env` no se pudo crear (Claude lo tiene denegado, V03 aplicada a Claude), así que se
+levantó con `--env-file inseguro/.env.example`.
+
+### Estado
+
+- App insegura: **completa y verificada en vivo**. Queda corriendo en http://127.0.0.1:8011.
+- Siguiente: duplicar en `seguro/` y corregir cada fallo; luego pruebas por `Vxx` y fichas.
+
+---
+
 ## 2026-09-27 · Sesión 15: V09 (comparaciones inseguras) — app insegura COMPLETA
 
 - Ruta `/v09`: login que compara la contraseña con `==` (timing) y el rol con `is`
