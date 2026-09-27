@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block titulo %}V04 · SQL Injection{% endblock %}
+
+{% block contenido %}
+<p><a class="volver" href="{{ url_for('index') }}">← Volver al inicio</a></p>
+<h1>V04 · Buscar productos <span class="codigo">SQL Injection</span></h1>
+
+<p class="intro">
+  Busca un producto por su nombre. La consulta se arma <strong>pegando tu texto</strong> dentro del
+  SQL, así que no solo buscas: puedes cambiar la consulta. Prueba primero con <code>martillo</code>
+  y luego con <code>' OR '1'='1</code> para que el buscador devuelva todo el inventario.
+</p>
+
+<form class="demo-form" method="get" action="{{ url_for('v04_sql_injection') }}">
+  <input type="text" name="q" value="{{ termino }}" placeholder="martillo" autofocus>
+  <button class="boton" type="submit">Buscar</button>
+</form>
+
+{% if sql %}
+<p>Consulta que ejecutó el backend (Python):</p>
+<div class="resultado">{{ sql }}</div>
+{% endif %}
+
+{% if error %}
+<p>La base de datos respondió con un error:</p>
+<div class="resultado">{{ error }}</div>
+{% elif termino %}
+<p>{{ filas|length }} resultado(s):</p>
+{% if filas %}
+<table class="tabla">
+  <thead><tr><th>id</th><th>sku</th><th>nombre</th><th>categoría</th><th>precio</th><th>stock</th></tr></thead>
+  <tbody>
+    {% for f in filas %}
+    <tr>{% for celda in f %}<td>{{ celda }}</td>{% endfor %}</tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endif %}
+{% endblock %}

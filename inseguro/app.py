@@ -7,9 +7,22 @@ ejemplo de cómo programar: la versión correcta está en la carpeta `seguro/`.
 
 import os
 
-from flask import Flask, render_template
+import psycopg
+from flask import Flask, render_template, request
 
 app = Flask(__name__)
+
+
+def conectar():
+    """Abre una conexión a Postgres. Es infraestructura, no la lección: los datos
+    de conexión salen de variables de entorno (bien), lo que falla está en las rutas."""
+    return psycopg.connect(
+        host=os.environ["POSTGRES_HOST"],
+        dbname=os.environ["POSTGRES_DB"],
+        user=os.environ["POSTGRES_USER"],
+        password=os.environ["POSTGRES_PASSWORD"],
+    )
+
 
 # Catálogo de demos. Cada vulnerabilidad agrega aquí su tarjeta y, más abajo, su ruta.
 DEMOS = [
@@ -37,9 +50,9 @@ DEMOS = [
     {
         "codigo": "V04",
         "titulo": "SQL Injection",
-        "ruta": None,
+        "ruta": "/v04",
         "resumen": "Buscar productos armando la consulta con el texto del usuario.",
-        "implementado": False,
+        "implementado": True,
     },
     {
         "codigo": "V05",
@@ -82,6 +95,30 @@ DEMOS = [
 @app.route("/")
 def index():
     return render_template("index.html", demos=DEMOS, version="insegura")
+
+
+@app.route("/v04")
+def v04_sql_injection():
+    """V04 — Buscar productos por nombre. Escribe el ataque y míralo funcionar."""
+    termino = request.args.get("q", "")
+    sql = ""
+    filas = []
+    error = ""
+    if termino:
+        # VULNERABLE V04 (SQL Injection): la consulta se arma pegando el texto del
+        # usuario dentro del SQL. Con   ' OR '1'='1   el buscador devuelve TODO el
+        # inventario, y con   '; ...   se pueden encadenar otras órdenes.
+        sql = f"SELECT * FROM productos WHERE nombre ILIKE '%{termino}%'"  # noqa: S608
+        try:
+            with conectar() as con, con.cursor() as cur:
+                cur.execute(sql)
+                filas = cur.fetchall()
+        except psycopg.Error as exc:
+            # Mostrar el error crudo también ayuda a ver el fallo en clase.
+            error = f"{type(exc).__name__}: {exc}"
+    return render_template(
+        "v04.html", termino=termino, sql=sql, filas=filas, error=error
+    )
 
 
 # ---------------------------------------------------------------------------

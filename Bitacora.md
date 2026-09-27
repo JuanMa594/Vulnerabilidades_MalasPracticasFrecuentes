@@ -5,6 +5,37 @@ Registro de lo que se hace en cada sesión, por qué se hizo así y qué queda p
 
 ---
 
+## 2026-09-27 · Sesión 8: V04 (SQL Injection) en la app insegura
+
+### Qué se hizo
+
+- Ruta `/v04` en `inseguro/app.py`: buscador de productos por nombre. La consulta se arma con
+  f-string pegando el texto del usuario (`# VULNERABLE V04 ... # noqa: S608`).
+- Plantilla `templates/v04.html`: formulario, la **consulta SQL que ejecutó el backend** (para que
+  se vea el ataque) y la tabla de resultados o el error crudo.
+- Se agregó el ayudante `conectar()` (primera vez que se usa la base de datos) y estilos de tabla.
+- La tarjeta V04 del inicio quedó activa.
+
+### Cómo se demuestra en clase
+
+1. Buscar `martillo` → devuelve solo ese producto.
+2. Buscar `' OR '1'='1` → devuelve **todo** el inventario: el texto cambió la consulta.
+3. La página muestra el SQL real ejecutado, así se ve por qué pasó.
+
+### Detalle de la regla
+
+`ruff` marca la línea con `S608` (SQL armado con texto). Como el fallo es **intencional**, se silencia
+solo esa línea con `# noqa: S608`; así ruff sigue avisando de cualquier SQL inseguro que NO sea parte
+de la lección. En la versión segura estará prohibido el `# noqa`.
+
+### Pendiente
+
+- Verificar con `docker compose up` que el ataque funciona de verdad (aún solo validado con ruff/ty
+  y `compose config`).
+- Faltan en la app insegura: V02, V03, V05, V06, V07, V08, V09.
+
+---
+
 ## 2026-09-27 · Sesión 7: base de la app insegura + V01
 
 ### Qué se hizo
