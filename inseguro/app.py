@@ -36,9 +36,9 @@ DEMOS = [
     {
         "codigo": "V02",
         "titulo": "Inyección de código / comandos",
-        "ruta": None,
+        "ruta": "/v02",
         "resumen": "Evaluar texto del usuario con eval()/os.system().",
-        "implementado": False,
+        "implementado": True,
     },
     {
         "codigo": "V03",
@@ -118,6 +118,26 @@ def v04_sql_injection():
             error = f"{type(exc).__name__}: {exc}"
     return render_template(
         "v04.html", termino=termino, sql=sql, filas=filas, error=error
+    )
+
+
+@app.route("/v02")
+def v02_inyeccion_codigo():
+    """V02 — Calculadora de descuentos que evalúa la fórmula escrita por el usuario."""
+    formula = request.args.get("formula", "")
+    resultado = ""
+    error = ""
+    if formula:
+        # VULNERABLE V02 (inyección de código): eval() ejecuta CUALQUIER cosa que
+        # escriba el usuario, no solo cuentas. Con
+        #   __import__('subprocess').check_output(['id'])
+        # se ejecutan comandos del sistema operativo.
+        try:
+            resultado = repr(eval(formula))  # noqa: S307
+        except Exception as exc:
+            error = f"{type(exc).__name__}: {exc}"
+    return render_template(
+        "v02.html", formula=formula, resultado=resultado, error=error
     )
 
 

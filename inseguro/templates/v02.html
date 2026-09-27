@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block titulo %}V02 · Inyección de código{% endblock %}
+
+{% block contenido %}
+<p><a class="volver" href="{{ url_for('index') }}">← Volver al inicio</a></p>
+<h1>V02 · Calculadora de descuentos <span class="codigo">Inyección de código</span></h1>
+
+<p class="intro">
+  Escribe una fórmula para calcular un precio con descuento. El backend la <strong>evalúa con
+  <code>eval()</code></strong>, así que no calcula: ejecuta lo que escribas. Prueba primero con
+  <code>1000 * 0.9</code> y luego con
+  <code>__import__('subprocess').check_output(['id'])</code>.
+</p>
+
+<form class="demo-form" method="get" action="{{ url_for('v02_inyeccion_codigo') }}">
+  <input type="text" name="formula" value="{{ formula }}" placeholder="1000 * 0.9" autofocus>
+  <button class="boton" type="submit">Calcular</button>
+</form>
+
+{% if error %}
+<p>Error:</p>
+<div class="resultado">{{ error }}</div>
+{% elif resultado %}
+<p>Resultado que devolvió <code>eval()</code>:</p>
+<div class="resultado">{{ resultado }}</div>
+{% endif %}
+{% endblock %}

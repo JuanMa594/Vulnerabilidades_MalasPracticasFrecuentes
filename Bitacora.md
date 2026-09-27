@@ -5,6 +5,15 @@ Registro de lo que se hace en cada sesión, por qué se hizo así y qué queda p
 
 ---
 
+## 2026-09-27 · Sesión 9: V02 (inyección de código) en la app insegura
+
+- Ruta `/v02`: calculadora de descuentos que hace `eval()` de la fórmula del usuario
+  (`# VULNERABLE V02`, `# noqa: S307`). Plantilla `v02.html` con formulario y resultado.
+- Demo: `1000 * 0.9` calcula; `__import__('subprocess').check_output(['id'])` ejecuta un comando
+  del sistema y muestra su salida. ruff y ty pasan.
+
+---
+
 ## 2026-09-27 · Sesión 8: V04 (SQL Injection) en la app insegura
 
 ### Qué se hizo
