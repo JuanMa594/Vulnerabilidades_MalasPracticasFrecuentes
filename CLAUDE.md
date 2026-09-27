@@ -30,7 +30,7 @@ explota cada mala práctica y cómo se arregla. La idea original está en `idea_
 - Python 3.14 · uv (entornos y dependencias) · ruff (formato y lint) · ty (tipos)
 - PostgreSQL + pgAdmin 4
 - Backend: **Flask**
-- Frontend: _pendiente_
+- Frontend: **HTML + CSS + JS**, servido por el mismo Flask (plantillas Jinja); sin app aparte
 - Docker: un `Dockerfile` por app y un `compose.yml` en la raíz
 
 ## Cómo enseña la demo
@@ -95,10 +95,13 @@ Los comandos de Docker se agregan cuando exista `compose.yml`.
 
 ## Decisiones tomadas
 - **Backend: Flask.** Framework mínimo: las rutas y las consultas se ven en el mismo archivo, sin capas que escondan el fallo. Ideal para nivel introductorio.
+- **Frontend: HTML + CSS + JS**, servido por el mismo Flask con plantillas Jinja; sin app aparte ni build. Condiciones para que enseñe en vez de distraer:
+  - Cada pantalla deja ver el ciclo petición → Python → respuesta: un formulario y un área que muestre el resultado crudo (lo que devolvió el backend), para que el estudiante vea qué hizo Python con lo que escribió.
+  - El JS no valida ni filtra nada de la lección: las vulnerabilidades son del backend y se demuestran atacando al backend. Si el JS bloqueara el payload, tapa el fallo.
+  - HTML, CSS y JS iguales en `inseguro/` y `seguro/`: la única diferencia entre las dos versiones sigue siendo el Python.
 
 ## Decisiones pendientes
 No tomes estas decisiones por tu cuenta: pregunta.
-- [ ] Frontend: ¿plantillas HTML servidas por Flask (Jinja), o una app aparte?
 - [ ] Base de datos: ¿una compartida por las dos apps, o una para cada una?
 - [ ] ¿Qué hacemos con `src/` y `pyproject.toml` que creó `uv init`?
 - [ ] Formato de las fichas para estudiantes en `docs/vulns/`

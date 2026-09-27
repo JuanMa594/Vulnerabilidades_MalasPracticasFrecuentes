@@ -5,6 +5,36 @@ Registro de lo que se hace en cada sesión, por qué se hizo así y qué queda p
 
 ---
 
+## 2026-09-27 · Sesión 6: frontend — HTML + CSS + JS servido por Flask
+
+### Qué se hizo
+
+- Decisión de frontend: **HTML + CSS + JS**, servido por el mismo Flask con plantillas Jinja, sin
+  app aparte ni build. En [CLAUDE.md](CLAUDE.md) pasó a "Decisiones tomadas" con tres condiciones.
+- Sigue sin escribirse código: solo se registró la decisión.
+
+### Por qué así, y la condición que se le puso
+
+El usuario quería HTML+CSS+JS y se eligió eso. Pero como la clase es de **Python** y las nueve
+vulnerabilidades (V01–V09) son de backend, el frontend no es donde se enseña: es la ventana para
+*ver* lo que hace Python. Por eso se le pusieron condiciones para que ayude en vez de estorbar:
+
+1. **Mostrar el ciclo.** Cada pantalla tiene un formulario y un área con el resultado crudo del
+   backend, para que el estudiante escriba (por ejemplo) `' OR 1=1 --` y vea qué hizo Python.
+2. **El JS no valida la lección.** Los fallos se demuestran atacando al backend; si el JS filtrara
+   el payload, taparía el fallo. (Además, "confiar en la validación del cliente" está fuera de
+   alcance justamente por esto.)
+3. **HTML/CSS/JS iguales en las dos versiones.** Así la única diferencia entre `inseguro/` y
+   `seguro/` sigue siendo el código Python, y `git diff` lo deja ver de una.
+
+### Pendiente
+
+- Última decisión de la Lección 1: base de datos, ¿una Postgres compartida (un esquema por versión)
+  o una por app? Recomendación: una compartida con dos esquemas.
+- Después de eso: qué hacer con `src/` y `pyproject.toml`, y el formato de las fichas.
+
+---
+
 ## 2026-09-27 · Sesión 5: backend elegido — Flask
 
 ### Qué se hizo
