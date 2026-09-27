@@ -10,7 +10,10 @@ explota cada mala práctica y cómo se arregla. La idea original está en `idea_
 - Código simple y explícito antes que elegante: debe entenderse leyéndolo una vez.
 
 ## Reglas de oro
-- En `compose.yml` los puertos se publican como `127.0.0.1:PUERTO:PUERTO`: nada del proyecto debe ser accesible desde otra máquina.
+- **Solo local, sin excepciones.** La demo emula el entorno en esta máquina: nada del proyecto se expone a internet ni a la red local.
+  - Los puertos se publican solo en `127.0.0.1` (`"127.0.0.1:8001:8000"`), nunca en todas las interfaces.
+  - Prohibido: `network_mode: host`, subir la demo a la nube o a un servidor, túneles (ngrok, cloudflared…), reenvíos de puertos (`netsh interface portproxy`) y reglas de firewall que abran puertos.
+  - Si una petición requiere exponer algo, detente y avisa en lugar de hacerlo: ningún motivo lo justifica.
 - Todos los secretos del proyecto son falsos y lo dicen (`sk-FALSO-...`, `clave_de_demo`).
 - Todo lo que aparece en la demo lo escribimos nosotros: nada de paquetes, payloads ni herramientas de terceros.
 - Los ataques de ejemplo solo apuntan a los contenedores de este proyecto.

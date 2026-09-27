@@ -10,6 +10,6 @@ Para la vulnerabilidad que te indiquen, verifica:
 
 1. **Inseguro**: el fallo existe, se puede explotar como describe la demostración y está marcado con `# VULNERABLE Vxx`. Señala cualquier otro fallo que no esté en el catálogo de CLAUDE.md.
 2. **Seguro**: la corrección cierra el fallo de verdad, no solo contra el ataque de ejemplo, y no introduce otro.
-3. **Contención**: puertos publicados solo en `127.0.0.1`, secretos falsos, contenedores sin root.
+3. **Contención**: nada expuesto fuera de esta máquina (puertos publicados solo en `127.0.0.1`, Postgres sin puertos publicados, sin `network_mode: host` ni túneles), secretos falsos, contenedores sin root. Cualquier exposición a la red es ❌ aunque el resto esté bien.
 
 Responde por punto con ✅ o ❌, indicando archivo:línea y la corrección sugerida. No edites archivos.

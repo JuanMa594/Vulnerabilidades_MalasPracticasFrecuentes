@@ -5,6 +5,47 @@ Registro de lo que se hace en cada sesión, por qué se hizo así y qué queda p
 
 ---
 
+## 2026-09-27 · Sesión 3: la demo nunca sale de esta máquina
+
+### Qué se hizo
+
+- En [CLAUDE.md](CLAUDE.md), la primera regla de oro ahora es **"Solo local, sin excepciones"**:
+  nada del proyecto se expone a internet ni a la red local. Enumera lo prohibido (`network_mode: host`,
+  nube, túneles, reenvíos de puertos, firewall) y ordena a Claude detenerse y avisar si una petición
+  lo requiere.
+- En [.claude/rules/docker.md](.claude/rules/docker.md) se agregaron las reglas técnicas: puertos solo en
+  `127.0.0.1`, Postgres sin puertos publicados y `network_mode: host` prohibido.
+- En [.claude/agents/auditor-seguridad.md](.claude/agents/auditor-seguridad.md), cualquier exposición a
+  la red cuenta como ❌ aunque todo lo demás esté bien.
+
+### Por qué así
+
+**La app insegura permite ejecutar código** (V02, V05). Si alguien de la red pudiera alcanzarla,
+tendría una puerta abierta a esta máquina. Por eso la regla no admite excepciones: ni siquiera "solo
+un momento para mostrarlo en clase".
+
+**`127.0.0.1` y `0.0.0.0` significan cosas distintas según dónde se usen:**
+
+| Dónde | Qué se pone | Por qué |
+|---|---|---|
+| En el host, en `ports:` del `compose.yml` | `127.0.0.1:8001:8000` | Solo esta máquina puede entrar |
+| Dentro del contenedor, donde escucha la app | `0.0.0.0` | Es la red interna de Docker; con `127.0.0.1` ni Docker podría llegar a la app |
+
+Es un error frecuente: se ve `0.0.0.0` dentro del contenedor y se cree que la app está expuesta, o se
+escribe `"8001:8000"` en `ports:` sin saber que eso la publica en todas las interfaces.
+
+**Postgres sin puertos.** Ni pgAdmin ni las apps necesitan que Postgres esté publicado en el host:
+lo alcanzan por la red interna de Docker. Un puerto que no se publica no se puede exponer por error.
+
+### Pendiente
+
+- Cuando exista `compose.yml`, agregar a "Comandos" una verificación que falle si algún puerto no
+  está en `127.0.0.1`, y comprobar desde otra máquina que no se ve nada.
+- Candidato para la lección de hooks: bloquear automáticamente un `compose.yml` que publique
+  puertos fuera de `127.0.0.1`.
+
+---
+
 ## 2026-09-27 · Sesión 2: reglas obligatorias (RTK, commits, uv, ruff, ty)
 
 ### Qué se hizo
