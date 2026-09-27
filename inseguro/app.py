@@ -43,9 +43,9 @@ DEMOS = [
     {
         "codigo": "V03",
         "titulo": "Secretos en el código",
-        "ruta": None,
+        "ruta": "/v03",
         "resumen": "Una clave escrita dentro del programa.",
-        "implementado": False,
+        "implementado": True,
     },
     {
         "codigo": "V04",
@@ -92,9 +92,21 @@ DEMOS = [
 ]
 
 
+# VULNERABLE V03 (secreto en el código): esta clave está escrita dentro del programa.
+# Cualquiera con acceso al código —o al historial de git, para siempre— la ve. Lo
+# correcto es leerla de una variable de entorno (ver `seguro/app.py`).
+API_KEY_PASARELA = "sk-FALSO-pagos-9c8b7a6d5e4f3210"  # noqa: S105
+
+
 @app.route("/")
 def index():
     return render_template("index.html", demos=DEMOS, version="insegura")
+
+
+@app.route("/v03")
+def v03_secreto_en_codigo():
+    """V03 — 'Configuración' de la pasarela de pagos que filtra la clave del código."""
+    return render_template("v03.html", api_key=API_KEY_PASARELA)
 
 
 @app.route("/v04")

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block titulo %}V03 · Secretos en el código{% endblock %}
+
+{% block contenido %}
+<p><a class="volver" href="{{ url_for('index') }}">← Volver al inicio</a></p>
+<h1>V03 · Pasarela de pagos <span class="codigo">Secreto en el código</span></h1>
+
+<p class="intro">
+  Esta pantalla muestra la clave que la app usa para cobrar. Está <strong>escrita dentro del
+  código</strong> (<code>app.py</code>), no en una variable de entorno. Por eso aparece aquí, y
+  también la vería cualquiera que lea el repositorio o su historial.
+</p>
+
+<p>Clave que la app tiene guardada:</p>
+<div class="resultado">API_KEY_PASARELA = {{ api_key }}</div>
+
+<p class="intro">
+  Para verlo desde afuera del navegador, en la terminal:
+</p>
+<div class="resultado">rtk grep -rn "sk-FALSO" inseguro/
+rtk git log -p -- inseguro/app.py   # sigue ahí aunque después la borres</div>
+{% endblock %}

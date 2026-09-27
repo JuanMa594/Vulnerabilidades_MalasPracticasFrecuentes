@@ -5,6 +5,15 @@ Registro de lo que se hace en cada sesión, por qué se hizo así y qué queda p
 
 ---
 
+## 2026-09-27 · Sesión 10: V03 (secretos en el código) en la app insegura
+
+- Constante `API_KEY_PASARELA` escrita en `app.py` (`# VULNERABLE V03`, `# noqa: S105`: ruff sí
+  detecta este fallo). Ruta `/v03` y `v03.html` muestran la clave y explican que también queda en
+  el historial de git.
+- Demo: la página muestra la clave; en terminal, `grep` y `git log -p` la encuentran. ruff y ty pasan.
+
+---
+
 ## 2026-09-27 · Sesión 9: V02 (inyección de código) en la app insegura
 
 - Ruta `/v02`: calculadora de descuentos que hace `eval()` de la fórmula del usuario
