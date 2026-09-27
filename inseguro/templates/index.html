@@ -1,28 +1,39 @@
 {% extends "base.html" %}
-{% block titulo %}Inicio{% endblock %}
+{% block titulo %}Tienda{% endblock %}
 
 {% block contenido %}
-<h1>Ferretería El Tornillo · panel de inventario</h1>
+<h1>Inventario de la tienda</h1>
 <p class="intro">
-  Un pequeño inventario de ferretería (consultar y editar productos) que sirve de excusa para
-  mostrar vulnerabilidades. Esta es la <strong>versión insegura</strong>: cada tarjeta abre una demo
-  con un fallo puesto a propósito. La misma pantalla, ya corregida, está en la versión segura (otro
-  puerto).
+  {{ productos|length }} productos. Esta es la <strong>versión insegura</strong>: se ve igual que la
+  segura, pero por dentro tiene los fallos. Las demos están en <a href="{{ url_for('lecciones') }}">Lecciones</a>.
 </p>
 
-<ul class="tarjetas">
-  {% for demo in demos %}
-  <li class="tarjeta {% if not demo.implementado %}tarjeta-inactiva{% endif %}">
-    <span class="codigo">{{ demo.codigo }}</span>
-    <h2>{{ demo.titulo }}</h2>
-    <p>{{ demo.resumen }}</p>
-    {% if demo.ruta %}
-      <a class="boton" href="{{ demo.ruta }}">Abrir demo</a>
-    {% elif demo.implementado %}
-      <span class="nota">Se ve en el código y al arrancar, no en una página.</span>
-    {% else %}
-      <span class="nota">Próximamente</span>
-    {% endif %}
+<div class="chips">
+  <a class="chip {% if not categoria %}chip-activo{% endif %}" href="{{ url_for('index') }}">Todos</a>
+  {% for c in categorias %}
+  <a class="chip {% if c == categoria %}chip-activo{% endif %}" href="{{ url_for('index', categoria=c) }}">{{ c }}</a>
+  {% endfor %}
+</div>
+
+{% if error %}
+<div class="resultado">No se pudo cargar el inventario: {{ error }}</div>
+{% endif %}
+
+<ul class="productos">
+  {% for sku, nombre, categoria, precio, stock, imagen in productos %}
+  <li class="producto">
+    <div class="foto">
+      <img src="{{ url_for('static', filename='img/' ~ imagen) }}" alt="{{ nombre }}" loading="lazy">
+    </div>
+    <div class="cuerpo">
+      <span class="cat">{{ categoria }}</span>
+      <h2>{{ nombre }}</h2>
+      <span class="sku">{{ sku }}</span>
+      <div class="fila">
+        <span class="precio">$ {{ "{:,.0f}".format(precio) }}</span>
+        <span class="stock {% if stock <= 20 %}stock-bajo{% endif %}">{{ stock }} en stock</span>
+      </div>
+    </div>
   </li>
   {% endfor %}
 </ul>

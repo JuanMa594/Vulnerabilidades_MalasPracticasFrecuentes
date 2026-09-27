@@ -102,7 +102,43 @@ API_KEY_PASARELA = "sk-FALSO-pagos-9c8b7a6d5e4f3210"  # noqa: S105
 
 @app.route("/")
 def index():
-    return render_template("index.html", demos=DEMOS, version="insegura")
+    """Tienda: catálogo del inventario. Código de infraestructura, escrito bien
+    (consulta parametrizada): la vitrina no es la lección, es el escenario."""
+    categoria = request.args.get("categoria", "")
+    categorias = []
+    productos = []
+    error = ""
+    try:
+        with conectar() as con, con.cursor() as cur:
+            cur.execute("SELECT DISTINCT categoria FROM productos ORDER BY categoria")
+            categorias = [c for (c,) in cur.fetchall()]
+            if categoria:
+                cur.execute(
+                    "SELECT sku, nombre, categoria, precio, stock, imagen "
+                    "FROM productos WHERE categoria = %s ORDER BY nombre",
+                    (categoria,),
+                )
+            else:
+                cur.execute(
+                    "SELECT sku, nombre, categoria, precio, stock, imagen "
+                    "FROM productos ORDER BY categoria, nombre"
+                )
+            productos = cur.fetchall()
+    except psycopg.Error as exc:
+        error = f"{type(exc).__name__}: {exc}"
+    return render_template(
+        "index.html",
+        productos=productos,
+        categorias=categorias,
+        categoria=categoria,
+        error=error,
+    )
+
+
+@app.route("/lecciones")
+def lecciones():
+    """Menú de las demos de vulnerabilidades (modo clase)."""
+    return render_template("lecciones.html", demos=DEMOS)
 
 
 @app.route("/v03")

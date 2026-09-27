@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block titulo %}Lecciones{% endblock %}
+
+{% block contenido %}
+<h1>Lecciones: vulnerabilidades y malas prácticas</h1>
+<p class="intro">
+  Cada tarjeta abre una demo con un fallo puesto a propósito sobre la tienda. Pruébalo aquí y luego
+  repite lo mismo en la <strong>versión segura</strong> (otro puerto): ahí ya no funciona.
+</p>
+
+<ul class="tarjetas">
+  {% for demo in demos %}
+  <li class="tarjeta {% if not demo.implementado %}tarjeta-inactiva{% endif %}">
+    <span class="codigo">{{ demo.codigo }}</span>
+    <h2>{{ demo.titulo }}</h2>
+    <p>{{ demo.resumen }}</p>
+    {% if demo.ruta %}
+      <a class="boton" href="{{ demo.ruta }}">Abrir demo</a>
+    {% elif demo.implementado %}
+      <span class="nota">Se ve en el código y al arrancar, no en una página.</span>
+    {% else %}
+      <span class="nota">Próximamente</span>
+    {% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% endblock %}

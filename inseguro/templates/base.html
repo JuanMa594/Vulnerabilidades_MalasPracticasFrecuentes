@@ -3,12 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block titulo %}Demo{% endblock %} · versión insegura</title>
+  <title>{% block titulo %}Tienda{% endblock %} · Ferretería El Tornillo</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/estilo.css') }}">
 </head>
 <body class="version-insegura">
   <header class="barra">
-    <a class="marca" href="{{ url_for('index') }}">Malas prácticas frecuentes</a>
+    <a class="marca" href="{{ url_for('index') }}">🔩 Ferretería El Tornillo</a>
+    <nav class="nav">
+      <a href="{{ url_for('index') }}">Tienda</a>
+      <a href="{{ url_for('lecciones') }}">Lecciones</a>
+    </nav>
     <span class="etiqueta etiqueta-insegura">VERSIÓN INSEGURA</span>
   </header>
 

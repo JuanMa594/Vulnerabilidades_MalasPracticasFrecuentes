@@ -33,7 +33,10 @@ body {
   border-bottom: 1px solid var(--borde);
 }
 
-.marca { color: var(--texto); font-weight: 700; text-decoration: none; }
+.marca { color: var(--texto); font-weight: 700; text-decoration: none; font-size: 1.05rem; }
+.nav { display: flex; gap: 1rem; margin-left: auto; margin-right: 1rem; }
+.nav a { color: var(--tenue); text-decoration: none; font-size: 0.9rem; }
+.nav a:hover { color: var(--texto); }
 
 .etiqueta {
   font-size: 0.75rem;
@@ -115,6 +118,58 @@ h1 { font-size: 1.6rem; }
 }
 .pie { color: var(--tenue); font-size: 0.8rem; text-align: center; padding: 1.5rem; }
 .volver { color: var(--acento); }
+
+/* Tienda: chips de categoría y grilla de productos */
+.chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0 1.5rem; }
+.chip {
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid var(--borde);
+  color: var(--tenue);
+  text-decoration: none;
+  font-size: 0.85rem;
+}
+.chip-activo { background: var(--acento); color: #04263a; border-color: var(--acento); font-weight: 700; }
+
+.productos {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+.producto {
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.foto {
+  aspect-ratio: 4 / 3;
+  background: #fff;
+}
+.foto img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.producto .cuerpo { padding: 0.8rem; display: flex; flex-direction: column; gap: 0.15rem; }
+.producto .cat {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--acento);
+}
+.producto h2 { font-size: 1rem; margin: 0.1rem 0; }
+.producto .sku { font-family: ui-monospace, monospace; font-size: 0.75rem; color: var(--tenue); }
+.producto .fila {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+}
+.producto .precio { font-weight: 700; font-size: 1.05rem; }
+.producto .stock { font-size: 0.75rem; color: var(--tenue); }
+.producto .stock-bajo { color: #fca5a5; font-weight: 700; }
 
 code {
   font-family: ui-monospace, monospace;

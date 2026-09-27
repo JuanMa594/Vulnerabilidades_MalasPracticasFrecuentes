@@ -5,6 +5,45 @@ Registro de lo que se hace en cada sesión, por qué se hizo así y qué queda p
 
 ---
 
+## 2026-09-27 · Sesión 17: front realista de la ferretería (catálogo con fotos)
+
+### Qué se hizo
+
+- La portada `/` de la app insegura ahora es una **tienda**: catálogo del inventario con foto,
+  categoría, precio y stock, filtros por categoría (chips). El menú de demos se movió a `/lecciones`
+  (enlace en la barra). Los enlaces "volver" de las demos ahora apuntan a Lecciones.
+- Se ampliió el inventario a **18 productos** en 9 categorías.
+- Se agregó la columna `imagen` a `productos`.
+
+### Imágenes: locales, bajadas de la web por Claude
+
+A pedido del usuario, las fotos se toman de la web pero **las descarga Claude en tiempo de
+construcción** y quedan guardadas en `inseguro/static/img/`. En runtime el navegador solo pide
+imágenes locales: no se rompe "solo local, sin excepciones".
+
+- Fuente: **Wikimedia Commons**, vía su API, filtrando por licencia permisiva (CC0, dominio
+  público, CC BY, CC BY-SA) y bajando miniaturas (~480px, 15–120 KB cada una).
+- Créditos (título, autor, licencia, URL) en `inseguro/static/img/CREDITOS.md`.
+- El script vive en el scratchpad (`descargar_imagenes.py`), no en el repo; también regenera
+  `init.sql`, así el catálogo tiene una sola fuente de verdad.
+
+### La tienda está bien escrita (no es la lección)
+
+La portada consulta la base con **consulta parametrizada** y filtro por categoría seguro: la vitrina
+es el escenario, no el fallo. Los fallos siguen en las rutas `/v0x`.
+
+### Verificado en vivo (reconstruido en 8011)
+
+- Portada 200 con 18 productos; las fotos cargan (p. ej. `FE-001.jpg`, 200, image/jpeg, ~94 KB).
+- `/lecciones` 200. Las 9 vulnerabilidades siguen funcionando tras recrear la base (V08 confirmado:
+  `['martillo','taladro','alfa','beta']` acumulado entre peticiones).
+
+### Pendiente
+
+- Duplicar en `seguro/` y corregir (incluida la parte ACID). Luego pruebas por `Vxx` y fichas.
+
+---
+
 ## 2026-09-27 · Sesión 16: se levanta la app insegura y se verifican las 9 en vivo
 
 ### Qué se hizo
