@@ -5,6 +5,30 @@ Registro de lo que se hace en cada sesión, por qué se hizo así y qué queda p
 
 ---
 
+## 2026-09-27 · Sesión 5: backend elegido — Flask
+
+### Qué se hizo
+
+- Se decidió el backend: **Flask**. En [CLAUDE.md](CLAUDE.md) pasó de la lista de pendientes a una
+  nueva sección **"Decisiones tomadas"**, y el Stack ya lo nombra.
+- Todavía no se instaló ni se escribió código: solo se registró la decisión, como se acordó.
+
+### Por qué Flask
+
+Para enseñar, lo que importa es que el fallo se vea de un vistazo. En Flask una ruta y su consulta a
+la base de datos caben en el mismo archivo, sin capas intermedias que oculten dónde está el problema.
+FastAPI habría metido async, validación con Pydantic e inyección de dependencias: bueno para
+producción, pero ruido para alguien que recién aprende a programar. La regla del proyecto es "código
+simple y explícito antes que elegante", y Flask encaja con eso.
+
+### Pendiente
+
+- Siguiente decisión sugerida: frontend. Lo natural con Flask es servir plantillas Jinja desde el
+  mismo backend; así no hay una segunda app que mantener y el foco queda en el fallo, no en el front.
+- Instalar Flask (`rtk uv add flask`) queda para cuando se dé la orden de empezar a construir.
+
+---
+
 ## 2026-09-27 · Sesión 4: cómo enseña la demo (lado a lado + comprobación)
 
 ### Qué se hizo

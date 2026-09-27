@@ -29,7 +29,7 @@ explota cada mala práctica y cómo se arregla. La idea original está en `idea_
 ## Stack
 - Python 3.14 · uv (entornos y dependencias) · ruff (formato y lint) · ty (tipos)
 - PostgreSQL + pgAdmin 4
-- Backend: _pendiente_
+- Backend: **Flask**
 - Frontend: _pendiente_
 - Docker: un `Dockerfile` por app y un `compose.yml` en la raíz
 
@@ -93,10 +93,12 @@ rtk uv run ty check          # tipos
 Los tres últimos deben pasar antes de cada commit. `rtk ruff` directo no sirve: ruff vive en el entorno del proyecto.
 Los comandos de Docker se agregan cuando exista `compose.yml`.
 
+## Decisiones tomadas
+- **Backend: Flask.** Framework mínimo: las rutas y las consultas se ven en el mismo archivo, sin capas que escondan el fallo. Ideal para nivel introductorio.
+
 ## Decisiones pendientes
 No tomes estas decisiones por tu cuenta: pregunta.
-- [ ] Backend: ¿Flask, FastAPI u otro?
-- [ ] Frontend: ¿plantillas HTML servidas por el backend, o una app aparte?
+- [ ] Frontend: ¿plantillas HTML servidas por Flask (Jinja), o una app aparte?
 - [ ] Base de datos: ¿una compartida por las dos apps, o una para cada una?
 - [ ] ¿Qué hacemos con `src/` y `pyproject.toml` que creó `uv init`?
 - [ ] Formato de las fichas para estudiantes en `docs/vulns/`
