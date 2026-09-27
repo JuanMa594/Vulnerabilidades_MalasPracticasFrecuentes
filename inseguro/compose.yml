@@ -1,0 +1,53 @@
+# App INSEGURA. Se levanta sola: rtk docker compose -f inseguro/compose.yml up --build
+# Todo se publica solo en 127.0.0.1 (ver "Solo local, sin excepciones" en CLAUDE.md).
+name: vulns-inseguro
+
+services:
+  web:
+    build:
+      # El contexto es la raíz del repo para poder copiar pyproject.toml y uv.lock.
+      context: ..
+      dockerfile: inseguro/Dockerfile
+    environment:
+      HOST: "0.0.0.0"   # dentro del contenedor: la red interna de Docker, no la máquina
+      PORT: "8000"
+      POSTGRES_HOST: db
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "127.0.0.1:8001:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    # Sin `ports`: a Postgres solo se llega desde la red interna de Docker.
+
+  pgadmin:
+    image: dpage/pgadmin4:9.8
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+    ports:
+      - "127.0.0.1:5051:80"
+    depends_on:
+      - db
+
+volumes:
+  db-data:

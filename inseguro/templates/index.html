@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block titulo %}Inicio{% endblock %}
+
+{% block contenido %}
+<h1>Ferretería El Tornillo · panel de inventario</h1>
+<p class="intro">
+  Un pequeño inventario de ferretería (consultar y editar productos) que sirve de excusa para
+  mostrar vulnerabilidades. Esta es la <strong>versión insegura</strong>: cada tarjeta abre una demo
+  con un fallo puesto a propósito. La misma pantalla, ya corregida, está en la versión segura (otro
+  puerto).
+</p>
+
+<ul class="tarjetas">
+  {% for demo in demos %}
+  <li class="tarjeta {% if not demo.implementado %}tarjeta-inactiva{% endif %}">
+    <span class="codigo">{{ demo.codigo }}</span>
+    <h2>{{ demo.titulo }}</h2>
+    <p>{{ demo.resumen }}</p>
+    {% if demo.ruta %}
+      <a class="boton" href="{{ demo.ruta }}">Abrir demo</a>
+    {% elif demo.implementado %}
+      <span class="nota">Se ve en el código y al arrancar, no en una página.</span>
+    {% else %}
+      <span class="nota">Próximamente</span>
+    {% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% endblock %}

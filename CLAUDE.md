@@ -56,15 +56,24 @@ Cada vulnerabilidad `Vxx` tiene una prueba que corre el mismo intento contra las
 Así, una sola orden demuestra ante la clase que cada arreglo cierra de verdad su fallo. Las pruebas
 solo apuntan a los contenedores locales de este proyecto.
 
-## Estructura (planeada, aún no existe)
+## Estructura
 ```text
-inseguro/        app vulnerable a propósito, con su Dockerfile
-seguro/          la misma app corregida: mismos archivos, funciones y rutas
+inseguro/        app vulnerable a propósito
+  app.py         Flask: rutas y consultas a la vista
+  templates/     HTML (Jinja)
+  static/        CSS y JS
+  db/init.sql    tabla y datos de ejemplo
+  Dockerfile
+  compose.yml    su Flask + su Postgres + su pgAdmin, todo en 127.0.0.1
+  .env.example
+seguro/          copia de inseguro/ con las buenas prácticas (mismos archivos y rutas)
 docs/vulns/      una ficha por vulnerabilidad para los estudiantes
-tests/           una prueba por Vxx: funciona en inseguro, falla en seguro
-compose.yml      postgres, pgadmin, app insegura y app segura (todo en 127.0.0.1)
-.env.example     variables necesarias, sin valores reales
+tests/           una prueba por Vxx: funciona contra inseguro, falla contra seguro
+pyproject.toml   dependencias y herramientas (raíz, compartido)
 ```
+Cada versión tiene **su propio `compose.yml`** y su propia base de datos: se levantan por separado
+y no comparten nada. Puertos: inseguro Flask `8001` / pgAdmin `5051`; seguro Flask `8002` /
+pgAdmin `5052`. Postgres no publica puertos (se llega por la red interna de Docker).
 
 ## Catálogo de vulnerabilidades
 El código `Vxx` se usa en comentarios, rutas y documentos.
@@ -91,7 +100,12 @@ rtk uv run ruff check .      # lint y reglas de seguridad
 rtk uv run ty check          # tipos
 ```
 Los tres últimos deben pasar antes de cada commit. `rtk ruff` directo no sirve: ruff vive en el entorno del proyecto.
-Los comandos de Docker se agregan cuando exista `compose.yml`.
+
+```bash
+rtk docker compose -f inseguro/compose.yml up --build   # levanta la app insegura
+rtk docker compose -f seguro/compose.yml up --build      # levanta la app segura
+rtk docker compose -f inseguro/compose.yml config        # valida el compose sin levantar nada
+```
 
 ## Decisiones tomadas
 - **Backend: Flask.** Framework mínimo: las rutas y las consultas se ven en el mismo archivo, sin capas que escondan el fallo. Ideal para nivel introductorio.
@@ -99,9 +113,11 @@ Los comandos de Docker se agregan cuando exista `compose.yml`.
   - Cada pantalla deja ver el ciclo petición → Python → respuesta: un formulario y un área que muestre el resultado crudo (lo que devolvió el backend), para que el estudiante vea qué hizo Python con lo que escribió.
   - El JS no valida ni filtra nada de la lección: las vulnerabilidades son del backend y se demuestran atacando al backend. Si el JS bloqueara el payload, tapa el fallo.
   - HTML, CSS y JS iguales en `inseguro/` y `seguro/`: la única diferencia entre las dos versiones sigue siendo el Python.
+- **Base de datos: una por app.** Cada versión trae su propia Postgres en su `compose.yml` ("compose aparte"): quedan aisladas y una no puede afectar a la otra.
+- **`src/` se eliminó.** El `pyproject.toml` de la raíz ya no es un paquete instalable: solo declara dependencias (Flask, psycopg) y herramientas (ruff, ty, pytest), compartidas por las dos apps.
+- **Dominio: inventario de una ferretería** ("Ferretería El Tornillo"). Tablas `productos` (precio y stock editables), `movimientos` y `usuarios`. Da una app real donde viven las vulnerabilidades: buscar productos (V04), editar precios/stock, login (V09).
+- **ACID solo en la versión segura.** La segura registra cada cambio de stock como un `movimiento` dentro de una transacción; la insegura actualiza el stock sin transacción ni registro. El contraste es una lección extra (candidata a `V10`, aún no formalizada).
 
 ## Decisiones pendientes
 No tomes estas decisiones por tu cuenta: pregunta.
-- [ ] Base de datos: ¿una compartida por las dos apps, o una para cada una?
-- [ ] ¿Qué hacemos con `src/` y `pyproject.toml` que creó `uv init`?
 - [ ] Formato de las fichas para estudiantes en `docs/vulns/`

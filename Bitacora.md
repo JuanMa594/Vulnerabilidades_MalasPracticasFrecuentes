@@ -5,6 +5,64 @@ Registro de lo que se hace en cada sesión, por qué se hizo así y qué queda p
 
 ---
 
+## 2026-09-27 · Sesión 7: base de la app insegura + V01
+
+### Qué se hizo
+
+Empieza la construcción. Se resolvieron las decisiones que faltaban y se levantó la base de la app
+insegura.
+
+**Decisiones que la instrucción "compose aparte" dejó resueltas** (en [CLAUDE.md](CLAUDE.md)):
+- Base de datos: **una por app**. Cada versión trae su propia Postgres en su propio `compose.yml`.
+- `src/` se eliminó; el `pyproject.toml` de la raíz pasó a ser no-paquete, solo dependencias y
+  herramientas compartidas (Flask, psycopg, ruff, ty, pytest).
+- **Dominio: inventario de una ferretería** ("Ferretería El Tornillo"), a pedido del usuario: tablas
+  `productos` (precio y stock editables), `movimientos` y `usuarios`. Da una app real donde viven
+  las vulnerabilidades.
+- **ACID solo en la versión segura**: la segura registrará cada cambio de stock como un `movimiento`
+  dentro de una transacción; la insegura lo hará sin transacción. Contraste = lección extra
+  (candidata a `V10`).
+
+**Archivos nuevos** (`inseguro/`): `app.py` (home + catálogo de demos), `templates/` (base + index),
+`static/css/estilo.css`, `static/js/app.js`, `db/init.sql` (ferretería con datos de ejemplo),
+`Dockerfile`, `compose.yml` (Flask + Postgres + pgAdmin, todo en `127.0.0.1`), `.env.example`.
+También `.dockerignore` en la raíz.
+
+**V01 (sin guardia `__main__`)**: `inseguro/app.py` llama a `app.run()` en el nivel superior, sin
+`if __name__ == "__main__":`. Importar el módulo arranca el servidor. Marcado `# VULNERABLE V01`.
+
+### Por qué así, decisiones técnicas
+
+- **Bind `0.0.0.0` sin que ruff se queje.** ruff marca el literal `"0.0.0.0"` (regla S104). Pero
+  dentro del contenedor ese bind es correcto (es la red interna de Docker). Solución sin `# noqa`:
+  el código usa `host=os.environ.get("HOST", "127.0.0.1")` (literal seguro) y el `0.0.0.0` se pasa
+  como variable de entorno desde el `compose.yml`, donde ruff no lo ve.
+- **Docker con uv.** Cada `Dockerfile` usa el contexto de build en la raíz (`context: ..`) para
+  copiar `pyproject.toml` y `uv.lock`, corre `uv sync --frozen --no-dev` y luego copia el código de
+  su app. Así las dos apps comparten las mismas versiones de dependencias.
+- **Contención.** Postgres no publica puertos; Flask y pgAdmin solo en `127.0.0.1`; la app corre
+  como usuario `app`, no root.
+- **La regla `deny` de `.env` funcionó.** Al intentar `cp .env.example .env`, el permiso `deny` de
+  Claude lo bloqueó (V03 aplicada a Claude). El `.env` lo crea la persona, no Claude.
+
+### Cómo probar la base
+
+```bash
+cp inseguro/.env.example inseguro/.env
+rtk docker compose -f inseguro/compose.yml up --build
+# abrir http://127.0.0.1:8001  (pgAdmin en http://127.0.0.1:5051)
+```
+Verificado sin levantar: ruff y ty pasan; `docker compose config` valida. Falta la prueba real de
+`up` (bajar imágenes `postgres:18` y `dpage/pgadmin4:9.8`; si algún tag no existe, ajustarlo).
+
+### Pendiente
+
+- Construir el resto de vulnerabilidades en la app insegura: V02, V03, V04, V05, V06, V07, V08, V09
+  (un commit por cada una).
+- Después: duplicar en `seguro/` y corregir. Formato de fichas en `docs/vulns/` sigue pendiente.
+
+---
+
 ## 2026-09-27 · Sesión 6: frontend — HTML + CSS + JS servido por Flask
 
 ### Qué se hizo

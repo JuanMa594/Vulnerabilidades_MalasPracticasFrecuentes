@@ -1,0 +1,117 @@
+/* Estilo compartido por las dos versiones. El color de la etiqueta cambia según
+   sea insegura (rojo) o segura (verde); el resto es igual a propósito, para que
+   la única diferencia entre versiones esté en el código Python, no en el aspecto. */
+
+:root {
+  --fondo: #0f172a;
+  --panel: #1e293b;
+  --texto: #e2e8f0;
+  --tenue: #94a3b8;
+  --borde: #334155;
+  --acento: #38bdf8;
+  --rojo: #ef4444;
+  --verde: #22c55e;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, "Segoe UI", sans-serif;
+  background: var(--fondo);
+  color: var(--texto);
+  line-height: 1.5;
+}
+
+.barra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1.5rem;
+  background: var(--panel);
+  border-bottom: 1px solid var(--borde);
+}
+
+.marca { color: var(--texto); font-weight: 700; text-decoration: none; }
+
+.etiqueta {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+}
+.etiqueta-insegura { background: var(--rojo); color: white; }
+.etiqueta-segura { background: var(--verde); color: white; }
+
+.contenido { max-width: 900px; margin: 0 auto; padding: 1.5rem; }
+
+h1 { font-size: 1.6rem; }
+.intro { color: var(--tenue); }
+
+.tarjetas {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+}
+
+.tarjeta {
+  position: relative;
+  background: var(--panel);
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  padding: 1rem 1rem 1.2rem;
+}
+.tarjeta h2 { font-size: 1.05rem; margin: 0.4rem 0; }
+.tarjeta p { color: var(--tenue); font-size: 0.9rem; }
+.tarjeta-inactiva { opacity: 0.5; }
+
+.codigo {
+  font-family: ui-monospace, monospace;
+  font-size: 0.8rem;
+  color: var(--acento);
+  font-weight: 700;
+}
+
+.boton {
+  display: inline-block;
+  margin-top: 0.5rem;
+  padding: 0.45rem 0.9rem;
+  background: var(--acento);
+  color: #04263a;
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.nota { font-size: 0.8rem; color: var(--tenue); }
+
+/* Formularios de demo y área de resultado */
+.demo-form { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 1rem 0; }
+.demo-form input[type="text"] {
+  flex: 1 1 260px;
+  padding: 0.5rem 0.7rem;
+  border-radius: 8px;
+  border: 1px solid var(--borde);
+  background: #0b1220;
+  color: var(--texto);
+  font-family: ui-monospace, monospace;
+}
+.resultado {
+  background: #0b1220;
+  border: 1px solid var(--borde);
+  border-left: 4px solid var(--acento);
+  border-radius: 8px;
+  padding: 1rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: ui-monospace, monospace;
+  font-size: 0.85rem;
+}
+.pie { color: var(--tenue); font-size: 0.8rem; text-align: center; padding: 1.5rem; }
+.volver { color: var(--acento); }

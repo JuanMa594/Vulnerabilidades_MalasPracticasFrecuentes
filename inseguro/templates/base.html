@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}Demo{% endblock %} · versión insegura</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/estilo.css') }}">
+</head>
+<body class="version-insegura">
+  <header class="barra">
+    <a class="marca" href="{{ url_for('index') }}">Malas prácticas frecuentes</a>
+    <span class="etiqueta etiqueta-insegura">VERSIÓN INSEGURA</span>
+  </header>
+
+  <main class="contenido">
+    {% block contenido %}{% endblock %}
+  </main>
+
+  <footer class="pie">
+    Demo docente. Todo corre solo en esta máquina (127.0.0.1). Los fallos son intencionales.
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
