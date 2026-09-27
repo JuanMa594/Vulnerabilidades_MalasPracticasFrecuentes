@@ -1,0 +1,75 @@
+# Vulnerabilidades y malas prácticas frecuentes
+
+Proyecto docente para un curso de introducción a la ciberseguridad. Muestra una aplicación
+**vulnerable a propósito** y su versión **corregida**, para que los estudiantes vean cómo se
+explota cada mala práctica y cómo se arregla. La idea original está en `idea_ethical_hacking.txt`.
+
+## Público y tono
+- Estudiantes que están aprendiendo a programar: nivel introductorio.
+- Código, comentarios, interfaz y documentación en español.
+- Código simple y explícito antes que elegante: debe entenderse leyéndolo una vez.
+
+## Reglas de oro
+- En `compose.yml` los puertos se publican como `127.0.0.1:PUERTO:PUERTO`: nada del proyecto debe ser accesible desde otra máquina.
+- Todos los secretos del proyecto son falsos y lo dicen (`sk-FALSO-...`, `clave_de_demo`).
+- Todo lo que aparece en la demo lo escribimos nosotros: nada de paquetes, payloads ni herramientas de terceros.
+- Los ataques de ejemplo solo apuntan a los contenedores de este proyecto.
+- No corrijas código dentro de `inseguro/` salvo que se pida: los fallos son intencionales.
+
+## Flujo de trabajo (obligatorio)
+- **RTK**: todo comando de terminal lleva el prefijo `rtk` (`rtk git status`, `rtk docker compose ps`). Si rtk no tiene filtro para un comando, lo ejecuta tal cual.
+- **uv** es el único gestor de Python: `rtk uv add`, `rtk uv sync`, `rtk uv run`. Prohibido `pip`, `poetry`, `pipenv`, `conda` y `python -m venv`.
+- **ruff** formatea y revisa el código; **ty** revisa los tipos. No se usan black, isort, flake8, pylint ni mypy.
+- **Commits**: cada avance que funciona se commitea sin esperar a que se pida, después de pasar las verificaciones de "Comandos". Un avance por commit, mensaje en español y en imperativo (`Agrega V04 en ambas versiones`). `git push` solo si se pide.
+- **Bitácora**: cada avance se registra en `Bitacora.md`. La entrada nueva va arriba de todo, debajo del encabezado: lo más reciente se lee primero.
+
+## Stack
+- Python 3.14 · uv (entornos y dependencias) · ruff (formato y lint) · ty (tipos)
+- PostgreSQL + pgAdmin 4
+- Backend: _pendiente_
+- Frontend: _pendiente_
+- Docker: un `Dockerfile` por app y un `compose.yml` en la raíz
+
+## Estructura (planeada, aún no existe)
+```text
+inseguro/        app vulnerable a propósito, con su Dockerfile
+seguro/          la misma app corregida: mismos archivos, funciones y rutas
+docs/vulns/      una ficha por vulnerabilidad para los estudiantes
+compose.yml      postgres, pgadmin, app insegura y app segura
+.env.example     variables necesarias, sin valores reales
+```
+
+## Catálogo de vulnerabilidades
+El código `Vxx` se usa en comentarios, rutas y documentos.
+
+| Código | Tema | Tipo | Inseguro | Seguro |
+|---|---|---|---|---|
+| V01 | Sin `if __name__ == "__main__"` | Mala práctica | código que se ejecuta al importar | guardia `__main__` |
+| V02 | Inyección de código/comandos | Seguridad | `eval`, `exec`, `os.system` con input | `ast.literal_eval`, `subprocess` con lista |
+| V03 | Secretos en el código | Seguridad | `API_KEY = "..."` | variables de entorno, `.env` fuera de git |
+| V04 | SQL Injection | Seguridad | f-string en la consulta | consulta parametrizada |
+| V05 | Deserialización insegura | Seguridad | `pickle.loads` con datos del usuario | `json` |
+| V06 | Path traversal | Seguridad | `open(f"/archivos/{nombre}")` | normalizar y validar la ruta |
+| V07 | `except` demasiado amplio | Mala práctica | `except: pass` | excepciones específicas |
+| V08 | Mutable por defecto | Bug | `def f(x, lista=[])` | `lista=None` |
+| V09 | Comparaciones inseguras | Seguridad | `==` con tokens, `is` con strings | `hmac.compare_digest`, `==` |
+
+Fuera de alcance: paquetes maliciosos (supply chain) y confiar en validación del lado del cliente.
+
+## Comandos
+```bash
+rtk uv sync                  # instala dependencias
+rtk uv run ruff format .     # formatea
+rtk uv run ruff check .      # lint y reglas de seguridad
+rtk uv run ty check          # tipos
+```
+Los tres últimos deben pasar antes de cada commit. `rtk ruff` directo no sirve: ruff vive en el entorno del proyecto.
+Los comandos de Docker se agregan cuando exista `compose.yml`.
+
+## Decisiones pendientes
+No tomes estas decisiones por tu cuenta: pregunta.
+- [ ] Backend: ¿Flask, FastAPI u otro?
+- [ ] Frontend: ¿plantillas HTML servidas por el backend, o una app aparte?
+- [ ] Base de datos: ¿una compartida por las dos apps, o una para cada una?
+- [ ] ¿Qué hacemos con `src/` y `pyproject.toml` que creó `uv init`?
+- [ ] Formato de las fichas para estudiantes en `docs/vulns/`

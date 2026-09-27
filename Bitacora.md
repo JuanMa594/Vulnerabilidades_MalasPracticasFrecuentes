@@ -1,0 +1,187 @@
+# Bitácora del proyecto
+
+Registro de lo que se hace en cada sesión, por qué se hizo así y qué queda pendiente.
+**Las entradas nuevas van arriba de todo: lo más reciente se lee primero.**
+
+---
+
+## 2026-09-27 · Sesión 2: reglas obligatorias (RTK, commits, uv, ruff, ty)
+
+### Qué se hizo
+
+- En [CLAUDE.md](CLAUDE.md) se agregó la sección **Flujo de trabajo (obligatorio)**:
+  - RTK en todo comando;
+  - uv como único gestor de Python;
+  - ruff y ty como únicas herramientas de calidad;
+  - commit de cada avance;
+  - esta bitácora con lo más reciente arriba.
+- Se instalaron ruff y ty como dependencias de desarrollo (`rtk uv add --dev ruff ty`). Quedaron en
+  `pyproject.toml`, en el grupo `dev`, y sus versiones exactas en `uv.lock`: ruff 0.16.9 y ty 0.0.84.
+- Se configuró ruff en `pyproject.toml` con reglas de seguridad (`S`) y de bugs frecuentes (`B`).
+- Se completó la sección **Comandos** de `CLAUDE.md` con las tres verificaciones previas a cada commit.
+- Se creó `.gitattributes` para que todo archivo de texto use finales de línea LF.
+- Primer commit del repositorio.
+
+### Por qué así
+
+**RTK obliga a trabajar en WSL.** En esta máquina rtk, docker y git están en WSL; en Windows no
+hay Docker. Por eso todo comando del proyecto pasa por `wsl zsh -ic "cd ... && rtk <comando>"`.
+Esa forma de llamarlo depende de esta máquina, así que va en [CLAUDE.local.md](CLAUDE.local.md).
+En [CLAUDE.md](CLAUDE.md), que se comparte, solo queda la regla general: "usar rtk".
+
+**La orden se repitió en los archivos que podían contradecirla.**
+
+| Archivo | Qué se ajustó |
+|---|---|
+| `CLAUDE.local.md` | Se carga junto a `CLAUDE.md` y podía contradecirlo; ahora repite que rtk es obligatorio y dice cómo llamarlo en esta máquina |
+| `skills/nueva-vulnerabilidad` | Terminaba sin commit. Ahora sus últimos pasos son verificar con ruff y ty, anotar en la bitácora y hacer el commit |
+| `settings.json` | Los permisos se escribieron con el prefijo `rtk` y se prohibieron `pip` y `poetry` |
+| `rules/codigo-inseguro.md` | Las reglas `S` de ruff marcan los fallos intencionales; se silencian solo en su línea con `# noqa: <regla>` |
+| `rules/codigo-seguro.md` | Prohibido `# noqa`: la versión segura debe pasar ruff sin excepciones |
+
+**ruff como herramienta docente.** Con las reglas `S`, ruff detecta solo varios fallos del
+catálogo (`eval`, `pickle`, SQL armado con texto, `except: pass`…). En `inseguro/` cada fallo
+intencional lleva su `# noqa`, así cualquier otro fallo sigue saliendo como error. En `seguro/`
+ruff tiene que pasar limpio. Se les puede mostrar a los estudiantes que una herramienta gratuita
+ya detectaba el problema.
+
+**`rtk ruff` directo no sirve.** ruff está instalado dentro del entorno del proyecto (`.venv`) y
+no en el sistema. La forma correcta es `rtk uv run ruff ...`.
+
+### Límite que conviene conocer
+
+Las reglas de `settings.json` comparan el texto del comando. En esta máquina todo va dentro de
+`wsl zsh -ic "..."`, así que esas reglas no coinciden aquí: lo que guía a Claude es `CLAUDE.md`.
+La forma de *obligar* de verdad, para Claude y para cualquier persona, es un hook que ejecute ruff
+y ty automáticamente. Queda para una próxima lección.
+
+### Pendiente
+
+- Todo lo pendiente de la Sesión 1 (Lección 1: decisiones pendientes en `CLAUDE.md`).
+- Próxima lección posible: hooks para que ruff y ty se ejecuten solos.
+
+---
+
+## 2026-09-27 · Sesión 1: estructura de Claude Code
+
+### Qué se hizo
+
+A partir de `idea_ethical_hacking.txt` se creó la configuración de Claude Code del proyecto.
+Todavía no hay código de la aplicación: primero se definen las reglas y después se construye.
+
+```text
+Vulnerabilidades_MalasPracticasFrecuentes/
+├── CLAUDE.md                          ← se sube a git (lo comparte todo el equipo)
+├── CLAUDE.local.md                    ← solo mío (está en .gitignore)
+├── Bitacora.md                        ← este archivo
+└── .claude/
+    ├── settings.json                  ← permisos de Claude
+    ├── rules/
+    │   ├── codigo-inseguro.md         ← se carga al trabajar en inseguro/**
+    │   ├── codigo-seguro.md           ← se carga al trabajar en seguro/**
+    │   └── docker.md                  ← se carga con Dockerfile y compose*.yml
+    ├── skills/nueva-vulnerabilidad/
+    │   └── SKILL.md                   ← se usa con /nueva-vulnerabilidad V04
+    └── agents/
+        └── auditor-seguridad.md       ← subagente revisor, sin permiso para editar
+```
+
+También se agregaron al `.gitignore`: `CLAUDE.local.md`, `.claude/settings.local.json` y `.env`.
+
+### Qué es cada pieza y cómo se llena
+
+**[CLAUDE.md](CLAUDE.md)**: Claude lo lee al iniciar cada sesión. Va solo lo que no se puede
+deducir leyendo el código: para qué es el proyecto, para quién es, las reglas que nunca se
+rompen y lo que falta decidir. Se llenó con lo del `.txt`, incluido el catálogo V01–V09. Cada
+vulnerabilidad tiene un código `Vxx` para que código, comentarios y fichas usen el mismo nombre.
+
+> Regla práctica: si una línea no cambiaría lo que hace Claude, sobra. Todo lo que está aquí
+> ocupa contexto en cada sesión.
+
+**[CLAUDE.local.md](CLAUDE.local.md)**: funciona igual que `CLAUDE.md`, pero es solo mío y no se
+sube a git. Sirve para datos de mi máquina, fechas de clase o qué vulnerabilidad toca en cada sesión.
+
+**[.claude/rules/](.claude/rules/)**: reglas por tema. La cabecera `paths:` hace que cada regla
+se cargue solo cuando Claude toca esos archivos, así las reglas de Docker no ocupan contexto
+mientras se programa en Python. El código inseguro y el seguro tienen reglas separadas porque en
+esta demo se contradicen: en una carpeta los fallos se dejan a propósito y en la otra se prohíben.
+
+```markdown
+---
+paths:
+  - "inseguro/**"
+---
+# Aquí van las reglas, en texto normal
+```
+
+**[.claude/settings.json](.claude/settings.json)** tiene tres listas de permisos:
+
+| Lista | Significado | Ejemplos en este proyecto |
+|---|---|---|
+| `allow` | Claude lo ejecuta sin preguntar | ver logs, `uv sync`, correr tests |
+| `ask` | Claude siempre pide permiso | `docker compose down` (con `-v` borra la base de datos), `git push` |
+| `deny` | Claude no puede hacerlo | leer o editar `.env` (la lección V03 aplicada a Claude) |
+
+La línea `$schema` le da autocompletado a VS Code al editar el archivo.
+`settings.local.json` se crea solo cuando apruebo un permiso con "no volver a preguntar"; es
+personal y no se sube.
+
+**[.claude/skills/nueva-vulnerabilidad/SKILL.md](.claude/skills/nueva-vulnerabilidad/SKILL.md)**:
+guarda un flujo que se va a repetir nueve veces: versión insegura, versión segura, cómo
+explotarla, ficha para estudiantes y revisión. Detalles de la cabecera:
+
+- `$ARGUMENTS` se reemplaza por lo que escriba después del comando (`/nueva-vulnerabilidad V04` → `V04`).
+- `disable-model-invocation: true`: el skill solo se ejecuta cuando yo lo llamo; Claude no lo lanza solo.
+- `argument-hint`: el texto de ayuda que aparece al escribir el comando.
+
+**[.claude/agents/auditor-seguridad.md](.claude/agents/auditor-seguridad.md)**: un revisor con
+contexto propio. Con `tools: Read, Grep, Glob` puede leer pero no modificar nada. Como no tiene
+`model:`, usa el mismo modelo que la sesión; se puede fijar otro, por ejemplo `model: sonnet`.
+
+### Cómo se crea cada pieza
+
+No hay un comando que cree toda la estructura. `/init` solo genera `CLAUDE.md`, y en este
+proyecto no se usó porque analiza el código y todavía no hay código.
+
+| Pieza | Cómo se crea |
+|---|---|
+| `CLAUDE.md` | `/init` o a mano |
+| `CLAUDE.local.md` | A mano |
+| `.mcp.json` | `claude mcp add <nombre> --scope project ...` o con `/mcp` |
+| `.claude/settings.json` | `/permissions`, `/config` o a mano |
+| `.claude/settings.local.json` | Se crea solo al aprobar un permiso con "no volver a preguntar" |
+| `.claude/rules/*.md` | A mano |
+| `.claude/skills/<nombre>/SKILL.md` | A mano |
+| `.claude/agents/*.md` | `/agents` (asistente guiado) o a mano |
+| hooks | `/hooks`; se guardan en `settings.json`. La carpeta `.claude/hooks/` es solo una convención para los scripts |
+
+### Lo que no se creó todavía, y por qué
+
+- **`.mcp.json`**: conecta Claude a servicios externos. Tendrá sentido cuando Postgres esté funcionando.
+- **Hooks**: necesitan comandos reales, como un formateador, y todavía no hay código.
+- **`.claude/commands/`**: es el formato antiguo; los skills lo reemplazan.
+
+Crear carpetas vacías "para tener orden" resta en lugar de sumar: cada pieza se agrega cuando
+hace falta de verdad.
+
+### Por confirmar
+
+- En `CLAUDE.md` quedaron fuera de alcance el punto 9 del `.txt` (confiar en validación del lado
+  del cliente) y el 10 (paquetes maliciosos). Así se interpretó la frase "ni confiar en
+  validaciones que yo mismo no haya creado". Si la idea era excluir solo el 10, hay que corregirlo.
+
+### Tarea: Lección 1
+
+1. Completar **Decisiones pendientes** en [CLAUDE.md](CLAUDE.md):
+   - [ ] Backend: ¿Flask, FastAPI u otro?
+   - [ ] Frontend: ¿plantillas HTML servidas por el backend, o una app aparte?
+   - [ ] Base de datos: ¿una compartida por las dos apps, o una para cada una?
+   - [ ] ¿Qué hacer con `src/` y `pyproject.toml` que creó `uv init`?
+   - [ ] Formato de las fichas para estudiantes en `docs/vulns/`
+2. Abrir una conversación nueva (`CLAUDE.md` se lee al iniciar) y escribir `/memory` para ver qué archivos cargó.
+3. Escribir `/` y comprobar que aparece `/nueva-vulnerabilidad`; con `/agents`, que aparece `auditor-seguridad`.
+
+### Próxima sesión
+
+- Lección 2: completar la sección **Comandos** de `CLAUDE.md` y definir el formato de la ficha para estudiantes.
+- Todavía no hay ningún commit en el repositorio.

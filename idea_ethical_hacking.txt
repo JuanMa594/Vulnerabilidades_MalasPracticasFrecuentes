@@ -1,0 +1,69 @@
+La idea empezo, conganas de enseñar a mis estudiantes de introducciona a la ciberseguridad las vulnerabilidades que puee ocurrir no usando las buenas practicas.
+
+esta fue la pregunta inicial: 
+"Que otra vulnerabilidad aparte de no declarar el if name = Main en python es bueno enseñar a los que están aprendiendo a programar "
+
+Mi investigacion llego a esto:
+Además del clásico if __name__ == "__main__":, hay varias vulnerabilidades y malas prácticas que conviene enseñar desde el principio porque son frecuentes, peligrosas y fáciles de entender:
+
+1. Inyección de código / comandos
+Cuando usas eval(), exec() o os.system() con input del usuario.
+
+python
+# MAL
+nombre = input("Tu nombre: ")
+eval(f"print('Hola {nombre}')")  # el usuario puede ejecutar código arbitrario
+Enseñar: nunca confíes en input externo. Usa alternativas seguras (ast.literal_eval, subprocess con listas).
+
+2. Contraseñas y secretos hardcodeados
+python
+# MAL
+API_KEY = "sk-1234567890abcdef"
+Enseñar: variables de entorno, .env, nunca subir secretos a Git.
+
+3. SQL Injection
+python
+# MAL
+cursor.execute(f"SELECT * FROM users WHERE name = '{nombre}'")
+Enseñar: consultas parametrizadas (cursor.execute("... WHERE name = ?", (nombre,))).
+
+4. Deserialización insegura
+pickle.loads() con datos no confiables = ejecución de código. Enseñar a preferir JSON.
+
+5. Path Traversal
+python
+# MAL
+open(f"/archivos/{nombre_usuario}")
+# usuario: ../../etc/passwd
+Enseñar a validar y normalizar rutas.
+
+6. Manejo de excepciones demasiado amplio
+python
+try:
+    ...
+except:  # o except Exception
+    pass
+Oculta errores reales y dificulta depurar. Enseñar a capturar excepciones específicas.
+
+7. Mutables como argumentos por defecto
+python
+def agregar(item, lista=[]):  # ¡lista se comparte entre llamadas!
+    lista.append(item)
+    return lista
+No es "vulnerabilidad" de seguridad, pero es un bug clásico que sorprende a todos.
+
+8. Comparaciones inseguras
+== para comparar contraseñas/tokens (timing attacks → usar hmac.compare_digest)
+
+is para comparar strings o números (funciona por casualidad con pequeños enteros)
+
+9. Confiar en validación del lado del cliente
+Si validas en JavaScript, el atacante puede saltárselo. Toda validación crítica debe repetirse en el servidor.
+
+10. Dependencias sin revisar
+pip install de cualquier paquete → supply chain attacks. Enseñar a revisar, fijar versiones, usar entornos virtuales.
+
+De los cuales lo de instalar paquete amciooso no lo hare ni confiar en validaciones que yo mismo no haya creado, al igual que cualquier opcion que yo mismo no haya creado para el demo
+
+
+me gusta la idea de postgres y pgadmin4 y algun front adicional, y lo de una version segura y una insegura, separadas en carpetas distintas y usar docker, compose.yml y dockerfile 

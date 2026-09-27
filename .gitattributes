@@ -1,0 +1,4 @@
+# Todo archivo de texto se guarda con finales de línea LF.
+# Se edita en Windows y se hace commit desde WSL: sin esto habría diferencias fantasma,
+# y un Dockerfile o script con CRLF falla dentro de un contenedor Linux.
+* text=auto eol=lf

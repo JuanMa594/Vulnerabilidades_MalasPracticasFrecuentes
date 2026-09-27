@@ -1,0 +1,28 @@
+[project]
+name = "vulnerabilidades-malaspracticasfrecuentes"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Navarro", email = "Navarrojuan212@gmail.com" }
+]
+requires-python = ">=3.14"
+dependencies = []
+
+[project.scripts]
+vulnerabilidades-malaspracticasfrecuentes = "vulnerabilidades_malaspracticasfrecuentes:main"
+
+[build-system]
+requires = ["uv_build>=0.12.6,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.16.9",
+    "ty>=0.0.84",
+]
+
+[tool.ruff.lint]
+# E, F: errores básicos · I: orden de imports · UP: sintaxis moderna
+# B: bugs frecuentes (incluye V08) · S: reglas de seguridad (detectan varias Vxx)
+select = ["E", "F", "I", "UP", "B", "S"]
