@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block titulo %}V06 · Path traversal{% endblock %}
+
+{% block contenido %}
+<p><a class="volver" href="{{ url_for('index') }}">← Volver al inicio</a></p>
+<h1>V06 · Ficha técnica <span class="codigo">Path traversal</span></h1>
+
+<p class="intro">
+  Descarga la ficha técnica de un producto escribiendo el nombre del archivo. La ruta se arma
+  <strong>pegando tu texto</strong>, sin comprobar que se quede dentro de la carpeta de fichas.
+  Prueba con <code>FE-001.txt</code> y luego con <code>../../../etc/passwd</code>.
+</p>
+
+<p>Fichas disponibles: {% for f in disponibles %}<code>{{ f }}</code> {% endfor %}</p>
+
+<form class="demo-form" method="get" action="{{ url_for('v06_path_traversal') }}">
+  <input type="text" name="archivo" value="{{ nombre }}" placeholder="FE-001.txt" autofocus>
+  <button class="boton" type="submit">Ver ficha</button>
+</form>
+
+{% if ruta %}
+<p>Ruta que abrió el backend:</p>
+<div class="resultado">{{ ruta }}</div>
+{% endif %}
+
+{% if error %}
+<p>Error:</p>
+<div class="resultado">{{ error }}</div>
+{% elif contenido %}
+<p>Contenido del archivo:</p>
+<div class="resultado">{{ contenido }}</div>
+{% endif %}
+{% endblock %}

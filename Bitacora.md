@@ -5,6 +5,16 @@ Registro de lo que se hace en cada sesión, por qué se hizo así y qué queda p
 
 ---
 
+## 2026-09-27 · Sesión 12: V06 (path traversal) en la app insegura
+
+- Ruta `/v06`: abre la ficha técnica cuyo nombre da el usuario, armando la ruta por concatenación
+  sin validar (`# VULNERABLE V06`). Carpeta `inseguro/fichas/` con fichas de ejemplo. Plantilla
+  `v06.html` que muestra la ruta abierta y el contenido.
+- Demo: `FE-001.txt` muestra la ficha; `../../../etc/passwd` se sale de la carpeta y lee un archivo
+  del sistema. ruff (sin regla para este caso) y ty pasan.
+
+---
+
 ## 2026-09-27 · Sesión 11: V05 (deserialización insegura) en la app insegura
 
 - Ruta `/v05`: restaura un "carrito" con `pickle.loads(base64.b64decode(...))`

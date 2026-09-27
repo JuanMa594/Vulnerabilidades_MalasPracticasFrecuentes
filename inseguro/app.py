@@ -66,9 +66,9 @@ DEMOS = [
     {
         "codigo": "V06",
         "titulo": "Path traversal",
-        "ruta": None,
+        "ruta": "/v06",
         "resumen": "Abrir un archivo usando un nombre sin validar.",
-        "implementado": False,
+        "implementado": True,
     },
     {
         "codigo": "V07",
@@ -152,6 +152,37 @@ def v02_inyeccion_codigo():
             error = f"{type(exc).__name__}: {exc}"
     return render_template(
         "v02.html", formula=formula, resultado=resultado, error=error
+    )
+
+
+FICHAS_DIR = os.path.join(os.path.dirname(__file__), "fichas")
+
+
+@app.route("/v06")
+def v06_path_traversal():
+    """V06 — Descargar la ficha técnica de un producto por su nombre de archivo."""
+    nombre = request.args.get("archivo", "")
+    ruta = ""
+    contenido = ""
+    error = ""
+    if nombre:
+        # VULNERABLE V06 (path traversal): la ruta se arma pegando el nombre que dio
+        # el usuario, sin validar que quede dentro de la carpeta de fichas. Con
+        #   ../../../etc/passwd   se sale de esa carpeta y se lee cualquier archivo.
+        ruta = f"{FICHAS_DIR}/{nombre}"
+        try:
+            with open(ruta, encoding="utf-8", errors="replace") as archivo:
+                contenido = archivo.read()
+        except OSError as exc:
+            error = f"{type(exc).__name__}: {exc}"
+    disponibles = sorted(os.listdir(FICHAS_DIR))
+    return render_template(
+        "v06.html",
+        nombre=nombre,
+        ruta=ruta,
+        contenido=contenido,
+        error=error,
+        disponibles=disponibles,
     )
 
 

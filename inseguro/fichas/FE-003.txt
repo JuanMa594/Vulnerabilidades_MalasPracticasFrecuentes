@@ -1,0 +1,5 @@
+Ficha técnica · FE-003
+Taladro percutor 650W
+- Potencia: 650 W
+- Velocidad: 0-3000 rpm
+- Portabrocas: 13 mm
