@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block titulo %}V05 · Deserialización insegura{% endblock %}
+
+{% block contenido %}
+<p><a class="volver" href="{{ url_for('index') }}">← Volver al inicio</a></p>
+<h1>V05 · Restaurar carrito <span class="codigo">Deserialización insegura</span></h1>
+
+<p class="intro">
+  Pega un "carrito guardado" (texto en base64) y el backend lo restaura con
+  <code>pickle.loads()</code>. El problema: pickle no solo lee datos, también puede
+  <strong>ejecutar código</strong> mientras deserializa.
+</p>
+
+<form class="demo-form" method="post" action="{{ url_for('v05_deserializacion') }}">
+  <input type="text" name="datos" value="{{ datos }}" placeholder="pega aquí el carrito en base64" autofocus>
+  <button class="boton" type="submit">Restaurar</button>
+</form>
+
+<p>1. Carrito normal (un producto y una cantidad):</p>
+<div class="resultado">gAWVJgAAAAAAAAB9lCiMCHByb2R1Y3RvlIwGRkUtMDAxlIwIY2FudGlkYWSUSwJ1Lg==</div>
+
+<p>2. Carrito "preparado": al restaurarlo se ejecuta el comando <code>id</code> del sistema, y lo que
+   ves como objeto es la salida de ese comando:</p>
+<div class="resultado">gAWVKwAAAAAAAACMCnN1YnByb2Nlc3OUjAxjaGVja19vdXRwdXSUk5RdlIwCaWSUYYWUUpQu</div>
+
+{% if error %}
+<p>Error:</p>
+<div class="resultado">{{ error }}</div>
+{% elif objeto %}
+<p>Objeto que devolvió <code>pickle.loads()</code>:</p>
+<div class="resultado">{{ objeto }}</div>
+{% endif %}
+{% endblock %}

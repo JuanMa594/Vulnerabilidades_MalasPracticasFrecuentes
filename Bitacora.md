@@ -5,6 +5,15 @@ Registro de lo que se hace en cada sesión, por qué se hizo así y qué queda p
 
 ---
 
+## 2026-09-27 · Sesión 11: V05 (deserialización insegura) en la app insegura
+
+- Ruta `/v05`: restaura un "carrito" con `pickle.loads(base64.b64decode(...))`
+  (`# VULNERABLE V05`, `# noqa: S301`). Plantilla `v05.html` con dos ejemplos listos para pegar.
+- El payload de ataque se generó con `subprocess.check_output(['id'])` vía `__reduce__`: al
+  deserializarlo ejecuta el comando y el "objeto" resultante es su salida. ruff y ty pasan.
+
+---
+
 ## 2026-09-27 · Sesión 10: V03 (secretos en el código) en la app insegura
 
 - Constante `API_KEY_PASARELA` escrita en `app.py` (`# VULNERABLE V03`, `# noqa: S105`: ruff sí

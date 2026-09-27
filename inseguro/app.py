@@ -5,7 +5,9 @@ comentarios `# VULNERABLE Vxx` marcan dónde está cada fallo. Este código NO e
 ejemplo de cómo programar: la versión correcta está en la carpeta `seguro/`.
 """
 
+import base64
 import os
+import pickle
 
 import psycopg
 from flask import Flask, render_template, request
@@ -57,9 +59,9 @@ DEMOS = [
     {
         "codigo": "V05",
         "titulo": "Deserialización insegura",
-        "ruta": None,
+        "ruta": "/v05",
         "resumen": "pickle.loads() sobre datos que vienen de afuera.",
-        "implementado": False,
+        "implementado": True,
     },
     {
         "codigo": "V06",
@@ -151,6 +153,23 @@ def v02_inyeccion_codigo():
     return render_template(
         "v02.html", formula=formula, resultado=resultado, error=error
     )
+
+
+@app.route("/v05", methods=["GET", "POST"])
+def v05_deserializacion():
+    """V05 — Restaurar un 'carrito guardado' que llega serializado con pickle."""
+    datos = request.form.get("datos", "")
+    objeto = ""
+    error = ""
+    if datos:
+        # VULNERABLE V05 (deserialización insegura): pickle.loads ejecuta lo que
+        # venga dentro de los datos. Un pickle preparado corre código del sistema
+        # en el momento de deserializarlo, antes de que veas ningún "carrito".
+        try:
+            objeto = repr(pickle.loads(base64.b64decode(datos)))  # noqa: S301
+        except Exception as exc:
+            error = f"{type(exc).__name__}: {exc}"
+    return render_template("v05.html", datos=datos, objeto=objeto, error=error)
 
 
 # ---------------------------------------------------------------------------
