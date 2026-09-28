@@ -6,17 +6,53 @@
 <h1>V06 · Ficha técnica <span class="codigo">Path traversal</span></h1>
 
 <p class="intro">
-  Descarga la ficha técnica de un producto escribiendo el nombre del archivo. La ruta se arma
-  <strong>pegando tu texto</strong>, sin comprobar que se quede dentro de la carpeta de fichas.
-  Prueba con <code>FE-001.txt</code> y luego con <code>../../../etc/passwd</code>.
+  Descarga la ficha técnica de un producto escribiendo el nombre del archivo. El backend
+  <strong>arma la ruta pegando tu texto</strong>, sin comprobar que se quede dentro de la carpeta
+  de fichas.
+</p>
+
+<h2 class="subt">Pruébalo aquí</h2>
+<p class="intro">
+  Escribe el nombre de una ficha, o pulsa <strong>Ejecutar</strong> en cualquier ejemplo (puedes
+  editarlo antes). El resultado aparece justo debajo, sin salir de esta página.
 </p>
 
 <p>Fichas disponibles: {% for f in disponibles %}<code>{{ f }}</code> {% endfor %}</p>
 
+<div class="probar">
+<div class="probar-controles">
 <form class="demo-form" method="get" action="{{ url_for('v06_path_traversal') }}">
   <input type="text" name="archivo" value="{{ nombre }}" placeholder="FE-001.txt" autofocus>
-  <button class="boton" type="submit">Ver ficha</button>
+  <button class="boton" type="submit">Ejecutar</button>
 </form>
+
+<ul class="ejemplos">
+  <li>
+    <span class="ej-cap">Ficha normal: abre <code>FE-001.txt</code> dentro de la carpeta de fichas:</span>
+    <form class="demo-form" method="get" action="{{ url_for('v06_path_traversal') }}">
+      <input type="text" name="archivo" value="FE-001.txt">
+      <button class="boton boton-sec" type="submit">Ejecutar</button>
+    </form>
+  </li>
+  <li>
+    <span class="ej-cap">Ataque clásico: se sale de la carpeta y lee <code>/etc/passwd</code> (usuarios del sistema):</span>
+    <form class="demo-form" method="get" action="{{ url_for('v06_path_traversal') }}">
+      <input type="text" name="archivo" value="../../../etc/passwd">
+      <button class="boton boton-sec" type="submit">Ejecutar</button>
+    </form>
+  </li>
+  <li>
+    <span class="ej-cap">Ataque: lee el código fuente de la app (<code>../app.py</code>, con el secreto de V03):</span>
+    <form class="demo-form" method="get" action="{{ url_for('v06_path_traversal') }}">
+      <input type="text" name="archivo" value="../app.py">
+      <button class="boton boton-sec" type="submit">Ejecutar</button>
+    </form>
+  </li>
+</ul>
+</div>
+<div class="probar-salida">
+{% if not nombre %}<p class="vacio">Pulsa <strong>Ejecutar</strong> para ver aquí el resultado.</p>{% endif %}
+
 
 {% if ruta %}
 <p>Ruta que abrió el backend:</p>
@@ -31,6 +67,9 @@
 <div class="resultado">{{ contenido }}</div>
 {% endif %}
 
+</div>
+</div>
+
 <section class="explica">
   <h3>Qué está mal</h3>
   <p>La ruta se arma concatenando el nombre que dio el usuario, sin validar.</p>
@@ -44,10 +83,31 @@ open(ruta)</pre>{% endraw %}
 
   <h3>Cómo verlo <span class="donde">la página</span></h3>
   <ol>
-    <li>Escribe <code>../../../etc/passwd</code>: verás el archivo de usuarios del sistema. Arriba se
-      muestra la ruta que realmente se abrió.</li>
-    <li>Lee el propio código de la app: <code>../app.py</code> (incluye el secreto de V03).</li>
+    <li>Arriba, <strong>Fichas disponibles</strong> lista los archivos legítimos de la carpeta. Con
+      <code>FE-001.txt</code> abres uno normal.</li>
+    <li>La página muestra dos cosas: la <strong>ruta que abrió el backend</strong> y el
+      <strong>contenido del archivo</strong>. Compara la ruta de <code>FE-001.txt</code>
+      (<code>/app/inseguro/fichas/FE-001.txt</code>) con la de <code>../../../etc/passwd</code>
+      (<code>/app/inseguro/fichas/../../../etc/passwd</code>): se ve cómo los <code>..</code> se
+      salen de la carpeta.</li>
+    <li>Con <code>../../../etc/passwd</code> el contenido es el archivo de usuarios del sistema; con
+      <code>../app.py</code> es el código fuente de la propia app.</li>
   </ol>
+
+  <h3>Detalles que verás <span class="donde">para no confundirse</span></h3>
+  <ul>
+    <li>Con <code>../app.py</code> el contenido incluye la línea
+      <code>API_KEY_PASARELA = "sk-FALSO-pagos-9c8b7a6d5e4f3210"</code>: es el
+      <strong>secreto de V03</strong>, ahora a la vista. Leer el código fuente suele ser el paso
+      previo a un ataque mayor.</li>
+    <li>En ese mismo volcado las comillas se ven escapadas: <code>&amp;#34;</code> en lugar de
+      <code>"</code> y <code>&amp;#39;</code> en lugar de <code>'</code>. No es parte del archivo:
+      es el HTML de la página escapando esos caracteres para mostrarlos. El archivo real tiene
+      comillas normales.</li>
+    <li>La última línea de <code>/etc/passwd</code> es
+      <code>app:x:1000:1000::/home/app:/bin/sh</code>: confirma que el proceso lee como el usuario
+      <code>app</code> del contenedor, no como root.</li>
+  </ul>
 
   <h3>Qué tan grave es <span class="sev sev-alta">Alta</span></h3>
   <p>Lectura de archivos arbitrarios: código fuente, configuraciones, claves. Muchas veces es el

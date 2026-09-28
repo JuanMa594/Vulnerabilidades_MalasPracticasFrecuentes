@@ -11,17 +11,39 @@
   <strong>ejecutar código</strong> mientras deserializa.
 </p>
 
+<h2 class="subt">Pruébalo aquí</h2>
+<p class="intro">
+  Pega tu propio carrito, o pulsa <strong>Ejecutar</strong> en cualquier ejemplo (puedes editarlo
+  antes). El resultado aparece justo debajo, sin salir de esta página.
+</p>
+
+<div class="probar">
+<div class="probar-controles">
 <form class="demo-form" method="post" action="{{ url_for('v05_deserializacion') }}">
   <input type="text" name="datos" value="{{ datos }}" placeholder="pega aquí el carrito en base64" autofocus>
-  <button class="boton" type="submit">Restaurar</button>
+  <button class="boton" type="submit">Ejecutar</button>
 </form>
 
-<p>1. Carrito normal (un producto y una cantidad):</p>
-<div class="resultado">gAWVJgAAAAAAAAB9lCiMCHByb2R1Y3RvlIwGRkUtMDAxlIwIY2FudGlkYWSUSwJ1Lg==</div>
+<ul class="ejemplos">
+  <li>
+    <span class="ej-cap">Carrito normal (da <code>{'producto': 'FE-001', 'cantidad': 2}</code>):</span>
+    <form class="demo-form" method="post" action="{{ url_for('v05_deserializacion') }}">
+      <input type="text" name="datos" value="gAWVJgAAAAAAAAB9lCiMCHByb2R1Y3RvlIwGRkUtMDAxlIwIY2FudGlkYWSUSwJ1Lg==">
+      <button class="boton boton-sec" type="submit">Ejecutar</button>
+    </form>
+  </li>
+  <li>
+    <span class="ej-cap">Ataque: al restaurarlo ejecuta el comando <code>id</code> y el "objeto" que ves es su salida:</span>
+    <form class="demo-form" method="post" action="{{ url_for('v05_deserializacion') }}">
+      <input type="text" name="datos" value="gAWVKwAAAAAAAACMCnN1YnByb2Nlc3OUjAxjaGVja19vdXRwdXSUk5RdlIwCaWSUYYWUUpQu">
+      <button class="boton boton-sec" type="submit">Ejecutar</button>
+    </form>
+  </li>
+</ul>
+</div>
+<div class="probar-salida">
+{% if not datos %}<p class="vacio">Pulsa <strong>Ejecutar</strong> para ver aquí el resultado.</p>{% endif %}
 
-<p>2. Carrito "preparado": al restaurarlo se ejecuta el comando <code>id</code> del sistema, y lo que
-   ves como objeto es la salida de ese comando:</p>
-<div class="resultado">gAWVKwAAAAAAAACMCnN1YnByb2Nlc3OUjAxjaGVja19vdXRwdXSUk5RdlIwCaWSUYYWUUpQu</div>
 
 {% if error %}
 <p>Error:</p>
@@ -30,6 +52,9 @@
 <p>Objeto que devolvió <code>pickle.loads()</code>:</p>
 <div class="resultado">{{ objeto }}</div>
 {% endif %}
+
+</div>
+</div>
 
 <section class="explica">
   <h3>Qué está mal</h3>
@@ -44,11 +69,20 @@
 
   <h3>Cómo verlo <span class="donde">la página + el contenedor</span></h3>
   <ol>
-    <li>Pega el carrito de ataque (2) y restaura: la página muestra <code>uid=1000(app)...</code>,
-      la salida real del comando.</li>
+    <li>Pega el carrito de ataque (el segundo ejemplo) y pulsa Ejecutar: la página muestra
+      <code>uid=1000(app)...</code>, la salida real del comando.</li>
     <li>Un payload podría dejar rastro (crear un archivo). Revisa dentro del contenedor:
       {% raw %}<pre class="codigo-bloque">rtk docker compose -f inseguro/compose.yml --env-file inseguro/.env.example exec web ls -l /tmp</pre>{% endraw %}</li>
   </ol>
+
+  <h3>Detalles que verás <span class="donde">para no confundirse</span></h3>
+  <ul>
+    <li>El ataque muestra <code>b'uid=1000(app) gid=1000(app) groups=1000(app)\n'</code>: la
+      <code>b'...'</code> significa que son <strong>bytes</strong> (lo que devuelve el comando) y
+      <code>\n</code> es el salto de línea. Es normal.</li>
+    <li>El carrito normal muestra <code>{'producto': 'FE-001', 'cantidad': 2}</code>: es un
+      diccionario de Python, el "objeto" que reconstruyó <code>pickle.loads()</code> sin ejecutar nada.</li>
+  </ul>
 
   <h3>Qué tan grave es <span class="sev sev-critica">Crítica</span></h3>
   <p>Ejecución de código con solo enviar datos. Aparece cada vez que se aceptan objetos serializados

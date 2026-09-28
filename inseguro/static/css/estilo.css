@@ -141,6 +141,38 @@ h1 { font-size: 1.6rem; }
   border: 1px solid var(--acento);
 }
 
+/* Layout de dos columnas: controles a la izquierda, resultado fijo a la derecha */
+.probar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1.2rem;
+  align-items: start;
+  margin-top: 0.5rem;
+}
+.probar-controles { min-width: 0; }
+.probar-salida {
+  min-width: 0;
+  position: sticky;
+  top: 1rem;
+  max-height: calc(100vh - 2rem);
+  overflow: auto;
+}
+.probar-salida .vacio {
+  color: var(--tenue);
+  font-size: 0.85rem;
+  border: 1px dashed var(--borde);
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+}
+/* La tabla de resultados dentro del panel puede desplazarse en horizontal */
+.probar-salida .tabla { display: block; overflow-x: auto; white-space: nowrap; }
+
+@media (max-width: 760px) {
+  .probar { grid-template-columns: 1fr; }
+  .probar-salida { position: static; max-height: none; }
+}
+
 /* Tienda: chips de categoría y grilla de productos */
 .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0 1.5rem; }
 .chip {

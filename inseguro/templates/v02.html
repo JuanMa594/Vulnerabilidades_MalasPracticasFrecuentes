@@ -16,6 +16,8 @@
   antes). El resultado aparece justo debajo, sin salir de esta página.
 </p>
 
+<div class="probar">
+<div class="probar-controles">
 <form class="demo-form" method="get" action="{{ url_for('v02_inyeccion_codigo') }}">
   <input type="text" name="formula" value="{{ formula }}" placeholder="escribe una fórmula" autofocus>
   <button class="boton" type="submit">Ejecutar</button>
@@ -51,6 +53,10 @@
     </form>
   </li>
 </ul>
+</div>
+<div class="probar-salida">
+{% if not formula %}<p class="vacio">Pulsa <strong>Ejecutar</strong> para ver aquí el resultado.</p>{% endif %}
+
 
 {% if error %}
 <p>Error:</p>
@@ -59,6 +65,9 @@
 <p>Resultado que devolvió <code>eval()</code>:</p>
 <div class="resultado">{{ resultado }}</div>
 {% endif %}
+
+</div>
+</div>
 
 <section class="explica">
   <h3>Qué está mal</h3>

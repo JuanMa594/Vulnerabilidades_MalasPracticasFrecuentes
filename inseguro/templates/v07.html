@@ -7,16 +7,45 @@
 
 <p class="intro">
   Cambia el precio de un producto por su SKU. Si algo falla, el backend se lo traga con
-  <code>except: pass</code> y <strong>siempre dice "guardado"</strong>. Prueba con un precio válido
-  (<code>30000</code>) y luego con uno inválido (<code>abc</code>): mira la tabla y verás que en el
-  segundo caso el precio no cambió, aunque el mensaje diga que sí.
+  <code>except: pass</code> y <strong>siempre dice "guardado"</strong>, haya guardado o no.
 </p>
 
+<h2 class="subt">Pruébalo aquí</h2>
+<p class="intro">
+  Escribe un SKU y un precio, o pulsa <strong>Ejecutar</strong> en cualquier ejemplo (puedes editarlo
+  antes). El resultado aparece justo debajo, sin salir de esta página. El mensaje solo sale al enviar;
+  para saber si de verdad guardó, mira la tabla de abajo.
+</p>
+
+<div class="probar">
+<div class="probar-controles">
 <form class="demo-form" method="post" action="{{ url_for('v07_except_amplio') }}">
   <input type="text" name="sku" placeholder="FE-001" autofocus>
   <input type="text" name="precio" placeholder="30000">
-  <button class="boton" type="submit">Guardar</button>
+  <button class="boton" type="submit">Ejecutar</button>
 </form>
+
+<ul class="ejemplos">
+  <li>
+    <span class="ej-cap">Precio válido: cambia <code>FE-001</code> a <code>30000</code> (la tabla lo refleja):</span>
+    <form class="demo-form" method="post" action="{{ url_for('v07_except_amplio') }}">
+      <input type="text" name="sku" value="FE-001">
+      <input type="text" name="precio" value="30000">
+      <button class="boton boton-sec" type="submit">Ejecutar</button>
+    </form>
+  </li>
+  <li>
+    <span class="ej-cap">Precio inválido (<code>abc</code>): dice "Precio actualizado" pero el precio <strong>no cambia</strong>:</span>
+    <form class="demo-form" method="post" action="{{ url_for('v07_except_amplio') }}">
+      <input type="text" name="sku" value="FE-001">
+      <input type="text" name="precio" value="abc">
+      <button class="boton boton-sec" type="submit">Ejecutar</button>
+    </form>
+  </li>
+</ul>
+</div>
+<div class="probar-salida">
+
 
 {% if mensaje %}
 <div class="resultado">{{ mensaje }}</div>
@@ -31,6 +60,9 @@
     {% endfor %}
   </tbody>
 </table>
+
+</div>
+</div>
 
 <section class="explica">
   <h3>Qué está mal</h3>
@@ -55,6 +87,15 @@ mensaje = "Precio actualizado."   # se muestra pase lo que pase</pre>{% endraw %
     <li>Vuelve a correr el SELECT: el precio <strong>no cambió</strong>. Con <code>30000</code> sí
       cambia. La base delata la mentira.</li>
   </ol>
+
+  <h3>Detalles que verás <span class="donde">para no confundirse</span></h3>
+  <ul>
+    <li>El mensaje <code>Precio actualizado.</code> es <strong>idéntico</strong> con <code>30000</code>
+      y con <code>abc</code>. La pantalla no distingue el éxito del fallo: solo la tabla (o pgAdmin) te
+      dice si de verdad cambió.</li>
+    <li>Como el formulario es <code>POST</code>, al enviar la página se recarga por GET: la tabla
+      "Precios actuales" ya sale al día, pero el mensaje solo aparece en ese envío.</li>
+  </ul>
 
   <h3>Qué tan grave es <span class="sev sev-media">Media</span></h3>
   <p>Fallos silenciosos: datos que "no se guardan" sin aviso, bugs imposibles de depurar, y encima

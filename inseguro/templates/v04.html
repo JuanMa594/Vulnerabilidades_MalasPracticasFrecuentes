@@ -7,14 +7,49 @@
 
 <p class="intro">
   Busca un producto por su nombre. La consulta se arma <strong>pegando tu texto</strong> dentro del
-  SQL, así que no solo buscas: puedes cambiar la consulta. Prueba <code>martillo</code>, luego
-  <code>' OR '1'='1</code>, y por último el ataque de abajo para robar contraseñas.
+  SQL, así que no solo buscas: puedes cambiar la consulta.
 </p>
 
+<h2 class="subt">Pruébalo aquí</h2>
+<p class="intro">
+  Escribe lo tuyo, o pulsa <strong>Ejecutar</strong> en cualquier ejemplo (puedes editarlo antes).
+  El resultado aparece justo debajo, sin salir de esta página.
+</p>
+
+<div class="probar">
+<div class="probar-controles">
 <form class="demo-form" method="get" action="{{ url_for('v04_sql_injection') }}">
   <input type="text" name="q" value="{{ termino }}" placeholder="martillo" autofocus>
-  <button class="boton" type="submit">Buscar</button>
+  <button class="boton" type="submit">Ejecutar</button>
 </form>
+
+<ul class="ejemplos">
+  <li>
+    <span class="ej-cap">Búsqueda normal (encuentra 1: el <code>Martillo de carpintero</code>):</span>
+    <form class="demo-form" method="get" action="{{ url_for('v04_sql_injection') }}">
+      <input type="text" name="q" value="martillo">
+      <button class="boton boton-sec" type="submit">Ejecutar</button>
+    </form>
+  </li>
+  <li>
+    <span class="ej-cap">Ataque <code>OR</code>: el filtro se vuelve siempre verdadero y devuelve los 18 productos:</span>
+    <form class="demo-form" method="get" action="{{ url_for('v04_sql_injection') }}">
+      <input type="text" name="q" value="' OR '1'='1">
+      <button class="boton boton-sec" type="submit">Ejecutar</button>
+    </form>
+  </li>
+  <li>
+    <span class="ej-cap">Ataque <code>UNION</code>: roba las contraseñas de la tabla <code>usuarios</code> (2 filas):</span>
+    <form class="demo-form" method="get" action="{{ url_for('v04_sql_injection') }}">
+      <input type="text" name="q" value="zzz' UNION SELECT id, nombre, password, rol, 0, 0, '' FROM usuarios -- ">
+      <button class="boton boton-sec" type="submit">Ejecutar</button>
+    </form>
+  </li>
+</ul>
+</div>
+<div class="probar-salida">
+{% if not termino %}<p class="vacio">Pulsa <strong>Ejecutar</strong> para ver aquí el resultado.</p>{% endif %}
+
 
 {% if sql %}
 <p>Consulta que ejecutó el backend (Python):</p>
@@ -38,6 +73,9 @@
 {% endif %}
 {% endif %}
 
+</div>
+</div>
+
 <section class="explica">
   <h3>Qué está mal</h3>
   <p>La consulta se construye con un f-string que mete el texto del usuario dentro del SQL.</p>
@@ -48,19 +86,36 @@
   el filtro se vuelve siempre verdadero y devuelve todo. Peor: con <code>UNION</code> se leen
   <strong>otras tablas</strong>, como <code>usuarios</code> (¡con las contraseñas!).</p>
 
-  <h3>Cómo verlo <span class="donde">pgAdmin</span></h3>
+  <h3>Cómo verlo <span class="donde">pgAdmin + la página</span></h3>
   <ol>
     <li>En el Query Tool de pgAdmin, corre la misma consulta que arma la app con
       <code>' OR '1'='1</code>:
       {% raw %}<pre class="codigo-bloque">SELECT * FROM productos WHERE nombre ILIKE '%' OR '1'='1%';</pre>{% endraw %}
       Devuelve los 18, no uno.</li>
-    <li>Para <strong>robar contraseñas</strong>, pega esto en el buscador de arriba:
+    <li>Para <strong>robar contraseñas</strong>, pulsa <strong>Ejecutar</strong> en el ejemplo
+      <code>UNION</code> de arriba (o pégalo en el buscador):
       {% raw %}<pre class="codigo-bloque">zzz' UNION SELECT id, nombre, password, rol, 0, 0, '' FROM usuarios -- </pre>{% endraw %}
-      En la columna "nombre" verás los usuarios y donde iría el nombre saldrá la contraseña
-      (<code>admin-secreto-demo</code>).</li>
+      Devuelve 2 filas con las credenciales (<code>admin-secreto-demo</code> y
+      <code>cajero123</code>).</li>
     <li>Compáralo en pgAdmin con lo que había:
       {% raw %}<pre class="codigo-bloque">SELECT nombre, password, rol FROM usuarios;</pre>{% endraw %}</li>
   </ol>
+
+  <h3>Detalles que verás <span class="donde">para no confundirse</span></h3>
+  <ul>
+    <li>La tabla de resultados <strong>miente en las cabeceras</strong>: <code>UNION</code> cuadra las
+      columnas por <strong>posición</strong>, no por nombre. Como el ataque pide
+      <code>id, nombre, password, rol</code>, la contraseña sale bajo la cabecera "nombre"
+      (<code>admin-secreto-demo</code>), el usuario bajo "sku" (<code>admin</code>) y el rol bajo
+      "categoría". No es un fallo de la tabla: es que la fila viene de <code>usuarios</code>, no de
+      <code>productos</code>.</li>
+    <li>Las columnas "precio" y "stock" salen en <code>0</code> y "imagen" sale vacía porque el ataque
+      rellena esas posiciones con <code>0, 0, ''</code> solo para completar las 7 columnas que espera
+      la consulta original.</li>
+    <li>El <code>--</code> del final (con un espacio detrás) es un comentario de SQL: descarta el
+      <code>%'</code> que la app pega después de tu texto, para que la consulta no dé error de
+      sintaxis.</li>
+  </ul>
 
   <h3>Qué tan grave es <span class="sev sev-critica">Crítica</span></h3>
   <p>Permite leer y alterar toda la base, incluidas credenciales. Es una de las vulnerabilidades más
