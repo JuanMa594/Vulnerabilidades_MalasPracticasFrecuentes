@@ -5,6 +5,45 @@ Registro de lo que se hace en cada sesión, por qué se hizo así y qué queda p
 
 ---
 
+## 2026-09-27 · Estado del proyecto y accesos (checkpoint)
+
+Las dos apps están construidas, verificadas en vivo y corriendo en paralelo.
+
+| | Insegura | Segura |
+|---|---|---|
+| App | http://127.0.0.1:8011 | http://127.0.0.1:8012 |
+| pgAdmin | http://127.0.0.1:5051 | http://127.0.0.1:5052 |
+| Badge | 🔴 VERSIÓN INSEGURA | 🟢 VERSIÓN SEGURA |
+
+**Credenciales (todas falsas, de demo):**
+- pgAdmin: correo `admin@ferreteria.com`, clave `pgadmin_de_demo`.
+- Dentro de pgAdmin, conectar a Postgres: host `db`, puerto 5432, base `demo`, usuario `demo`,
+  clave `clave_de_demo` (Postgres no publica puerto).
+- Login de la app (V09): `admin` / `admin-secreto-demo` o `cajero` / `cajero123`.
+
+**Levantar / bajar** (el `.env` lo crea la persona; alternativa: `--env-file <carpeta>/.env.example`):
+```bash
+rtk docker compose -f inseguro/compose.yml --env-file inseguro/.env.example up -d --build
+rtk docker compose -f seguro/compose.yml   --env-file seguro/.env.example   up -d --build
+rtk docker compose -f inseguro/compose.yml --env-file inseguro/.env.example down
+```
+
+**Comparar el código para la clase** (muestra solo las correcciones):
+```bash
+rtk git diff --no-index inseguro/app.py seguro/app.py
+```
+
+**Hecho:** estructura de Claude Code; app insegura con V01–V09 (tienda de ferretería con 18
+productos y fotos); cada demo autocontenida (qué pasa, cómo verlo, gravedad); app segura con las 9
+correcciones. Todo verificado con `curl` y con ruff/ty.
+
+**Pendiente:**
+- Lección ACID (`movimientos` en transacción), candidata a V10: función nueva en ambas apps.
+- Pruebas automatizadas por `Vxx` (una orden que ataca las dos apps).
+- Fichas para estudiantes en `docs/vulns/`.
+
+---
+
 ## 2026-09-27 · Sesión 20: versión SEGURA completa (seguro/) y verificada
 
 ### Qué se hizo
