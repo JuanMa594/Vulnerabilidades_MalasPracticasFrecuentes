@@ -5,6 +5,43 @@ Registro de lo que se hace en cada sesión, por qué se hizo así y qué queda p
 
 ---
 
+## 2026-09-27 · Sesión 21: demos interactivas, retórica unificada y resultado al costado
+
+### Qué se hizo
+
+- **Un agente por caso** (V01, V03–V09; V02 fue la referencia) unificó la retórica de cada página
+  siguiendo una especificación común y el patrón de oro de V02. Todas quedaron con la misma
+  estructura: `Qué está mal → Qué pasa por debajo → Cómo verlo → Detalles que verás → Qué tan grave
+  es → Cómo se arregla`.
+- **Sección "Pruébalo aquí"** en las demos con entrada (V04–V09): ejemplos ejecutables, cada uno con
+  su input pre-cargado y botón **Ejecutar**, para probar cada payload sin salir de la página ni
+  reescribirlo. Botones del formulario libre unificados a "Ejecutar".
+- **"Detalles que verás"** donde probar reveló algo que confunde: la salida en bytes `b'...'` (V02,
+  V05), las columnas desalineadas del `UNION` en V04 (la contraseña sale bajo la cabecera "nombre"),
+  el mensaje idéntico de V07 (miente), la lista escapada `&#39;` de V08, el `SyntaxWarning` de V09,
+  el secreto de V03 al leer `../app.py` en V06.
+- **Layout de dos columnas** (a pedido del usuario): controles a la izquierda y el resultado en un
+  panel derecho **sticky**, para verlo sin bajar la página. En móvil se apila. Se aplicó con un
+  script (`scratchpad/wrap_layout.py`) que envuelve `.probar` / `.probar-controles` / `.probar-salida`.
+- **Sincronización a `seguro/`**: las demos son idénticas (los ataques fallan ahí = la lección);
+  `seguro/v05.html` usa JSON; se corrigió el texto del índice y se conservó el aviso verde.
+
+### Verificado en vivo
+
+- Insegura (8011) y segura (8012): las 9 páginas rinden 200, con el panel de resultado al costado y
+  sin fugas de Jinja. Los botones Ejecutar funcionan.
+- Los ataques siguen funcionando en la insegura y **fallan en la segura** (V04 UNION → 0 filas;
+  V07 `abc` → "El precio debe ser un número"; V02 rechaza; V06 "Ruta no permitida"; V05 pickle no
+  ejecuta; V08 no acumula; V09 admin reconocido).
+
+### Cómo se coordinó
+
+Los 8 agentes editaron cada uno solo su plantilla (sin choques), probaron sus payloads con `curl`
+contra 8011, y no tocaron Docker ni hicieron commits. La integración (layout, sync a seguro, rebuild,
+verificación, commits) la hizo la sesión principal.
+
+---
+
 ## 2026-09-27 · Estado del proyecto y accesos (checkpoint)
 
 Las dos apps están construidas, verificadas en vivo y corriendo en paralelo.

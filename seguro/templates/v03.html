@@ -31,7 +31,16 @@
     <li>Verlo en el historial (sigue ahí aunque lo borres del archivo):
       {% raw %}<pre class="codigo-bloque">rtk git log -p -- inseguro/app.py</pre>{% endraw %}</li>
   </ol>
-  <p>No aplica pgAdmin: no es un dato de la base, es del código.</p>
+
+  <h3>Detalles que verás <span class="donde">para no confundirse</span></h3>
+  <ul>
+    <li>La página muestra <code>sk-FALSO-pagos-9c8b7a6d5e4f3210</code> <strong>sin comillas</strong>;
+      en el código es un texto de Python, por eso en la fuente aparece entre comillas
+      (<code>"sk-FALSO-..."</code>). Es el mismo valor.</li>
+    <li>La clave lleva <code>FALSO</code> a propósito: es de demostración y no cobra de verdad. En un
+      caso real ahí estaría la clave verdadera y el fallo sería idéntico.</li>
+    <li>Aquí no hay nada que mirar en pgAdmin: el secreto no está en la base, está en el código.</li>
+  </ul>
 
   <h3>Qué tan grave es <span class="sev sev-alta">Alta</span></h3>
   <p>Quien vea el secreto puede usar el servicio (aquí, cobrar con la pasarela). Rotarlo obliga a

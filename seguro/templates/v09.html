@@ -6,23 +6,67 @@
 <h1>V09 · Iniciar sesión <span class="codigo">Comparaciones inseguras</span></h1>
 
 <p class="intro">
-  Inicia sesión en la caja. El backend hace dos comparaciones mal:
-  la contraseña con <code>==</code> (deja medir por tiempo cuántos caracteres aciertas) y el rol con
-  <code>is</code> (compara identidad, no valor). Entra con <code>admin</code> /
-  <code>admin-secreto-demo</code>: verás que la sesión inicia pero <strong>no te reconoce como
-  admin</strong>, porque <code>rol is "admin"</code> falla aunque el rol sea "admin".
+  Inicia sesión en la caja. El backend compara la contraseña con <code>==</code> y decide el rol con
+  <code>is</code>: dos comparaciones mal hechas. Entra con <code>admin</code> /
+  <code>admin-secreto-demo</code> y verás que la sesión inicia, pero <strong>no te reconoce como
+  admin</strong>.
 </p>
 
+<h2 class="subt">Pruébalo aquí</h2>
+<p class="intro">
+  Escribe tu usuario y contraseña, o pulsa <strong>Ejecutar</strong> en cualquier ejemplo (puedes
+  editarlo antes). El resultado aparece justo debajo, sin salir de esta página.
+</p>
+
+<div class="probar">
+<div class="probar-controles">
 <form class="demo-form" method="post" action="{{ url_for('v09_comparaciones') }}">
-  <input type="text" name="usuario" placeholder="admin" autofocus>
-  <input type="text" name="password" placeholder="admin-secreto-demo">
-  <button class="boton" type="submit">Entrar</button>
+  <input type="text" name="usuario" placeholder="usuario" autofocus>
+  <input type="text" name="password" placeholder="contraseña">
+  <button class="boton" type="submit">Ejecutar</button>
 </form>
 
+<ul class="ejemplos">
+  <li>
+    <span class="ej-cap">Login normal: el cajero entra bien. Da <code>Sesión iniciada.</code> y
+      <code>¿admin?: no</code> (correcto: el cajero no es admin):</span>
+    <form class="demo-form" method="post" action="{{ url_for('v09_comparaciones') }}">
+      <input type="text" name="usuario" value="cajero">
+      <input type="text" name="password" value="cajero123">
+      <button class="boton boton-sec" type="submit">Ejecutar</button>
+    </form>
+  </li>
+  <li>
+    <span class="ej-cap">El fallo del <code>is</code>: la contraseña es correcta y la sesión inicia,
+      pero <code>¿admin?: no</code> aunque el rol sea <code>admin</code>:</span>
+    <form class="demo-form" method="post" action="{{ url_for('v09_comparaciones') }}">
+      <input type="text" name="usuario" value="admin">
+      <input type="text" name="password" value="admin-secreto-demo">
+      <button class="boton boton-sec" type="submit">Ejecutar</button>
+    </form>
+  </li>
+  <li>
+    <span class="ej-cap">Contraseña incorrecta: da <code>Usuario o contraseña incorrectos.</code>:</span>
+    <form class="demo-form" method="post" action="{{ url_for('v09_comparaciones') }}">
+      <input type="text" name="usuario" value="admin">
+      <input type="text" name="password" value="clave-mala">
+      <button class="boton boton-sec" type="submit">Ejecutar</button>
+    </form>
+  </li>
+</ul>
+</div>
+<div class="probar-salida">
+{% if not mensaje %}<p class="vacio">Pulsa <strong>Ejecutar</strong> para ver aquí el resultado.</p>{% endif %}
+
+
 {% if mensaje %}
+<p>Lo que responde el backend:</p>
 <div class="resultado">{{ mensaje }}
 ¿Reconocido como admin?: {{ "sí" if es_admin else "no" }}</div>
 {% endif %}
+
+</div>
+</div>
 
 <section class="explica">
   <h3>Qué está mal</h3>
@@ -43,11 +87,24 @@
   <ol>
     <li>En pgAdmin, mira lo que se compara con <code>==</code>:
       {% raw %}<pre class="codigo-bloque">SELECT nombre, password, rol FROM usuarios;</pre>{% endraw %}</li>
-    <li>En la demo, entra como <code>admin</code>: dice "Sesión iniciada" pero "¿admin?: no". La
-      autorización se rompió por el <code>is</code>.</li>
+    <li>En la demo, entra como <code>admin</code> (<code>admin</code> / <code>admin-secreto-demo</code>):
+      la sesión inicia, pero no te reconoce como admin. La autorización se rompió por el <code>is</code>.</li>
     <li>Python mismo lo advierte al arrancar; míralo en los logs:
       {% raw %}<pre class="codigo-bloque">rtk docker compose -f inseguro/compose.yml --env-file inseguro/.env.example logs web | grep SyntaxWarning</pre>{% endraw %}</li>
   </ol>
+
+  <h3>Detalles que verás <span class="donde">para no confundirse</span></h3>
+  <ul>
+    <li>Con <code>admin</code> (la contraseña es correcta) verás <code>Sesión iniciada.</code> y
+      debajo <code>¿Reconocido como admin?: no</code>. No es un error de tipeo ni un fallo de login:
+      la sesión <strong>sí</strong> inició; lo que falló fue reconocerte como admin, por el
+      <code>is</code>. El <code>cajero</code> también dice <code>no</code>, pero ahí es correcto
+      (no es admin).</li>
+    <li>En los logs, al arrancar, Python avisa una vez:
+      {% raw %}<pre class="codigo-bloque">/app/inseguro/app.py:322: SyntaxWarning: "is" with 'str' literal. Did you mean "=="?</pre>{% endraw %}
+      No es un crash —la app arranca igual—; es el propio Python señalando el <code>is</code> con un
+      literal.</li>
+  </ul>
 
   <h3>Qué tan grave es <span class="sev sev-alta">Alta</span></h3>
   <p>El <code>==</code> puede filtrar secretos por tiempo; el <code>is</code> hace que la

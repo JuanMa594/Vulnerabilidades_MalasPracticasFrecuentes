@@ -48,15 +48,6 @@ body {
 .etiqueta-insegura { background: var(--rojo); color: white; }
 .etiqueta-segura { background: var(--verde); color: white; }
 
-.aviso-seguro {
-  background: rgba(34, 197, 94, 0.12);
-  border-bottom: 1px solid var(--verde);
-  color: #bbf7d0;
-  text-align: center;
-  padding: 0.5rem 1rem;
-  font-size: 0.85rem;
-}
-
 .contenido { max-width: 900px; margin: 0 auto; padding: 1.5rem; }
 
 h1 { font-size: 1.6rem; }
@@ -127,6 +118,60 @@ h1 { font-size: 1.6rem; }
 }
 .pie { color: var(--tenue); font-size: 0.8rem; text-align: center; padding: 1.5rem; }
 .volver { color: var(--acento); }
+
+/* Bloque "Pruébalo aquí": ejemplos ejecutables */
+.subt {
+  font-size: 1.15rem;
+  margin: 1.6rem 0 0.3rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--borde);
+}
+.ejemplos { list-style: none; padding: 0; margin: 0.5rem 0 1rem; display: grid; gap: 0.6rem; }
+.ejemplos li {
+  background: var(--panel);
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  padding: 0.7rem 0.9rem;
+}
+.ej-cap { display: block; color: var(--tenue); font-size: 0.85rem; margin-bottom: 0.4rem; }
+.ejemplos .demo-form { margin: 0; }
+.boton-sec {
+  background: transparent;
+  color: var(--acento);
+  border: 1px solid var(--acento);
+}
+
+/* Layout de dos columnas: controles a la izquierda, resultado fijo a la derecha */
+.probar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1.2rem;
+  align-items: start;
+  margin-top: 0.5rem;
+}
+.probar-controles { min-width: 0; }
+.probar-salida {
+  min-width: 0;
+  position: sticky;
+  top: 1rem;
+  max-height: calc(100vh - 2rem);
+  overflow: auto;
+}
+.probar-salida .vacio {
+  color: var(--tenue);
+  font-size: 0.85rem;
+  border: 1px dashed var(--borde);
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+}
+/* La tabla de resultados dentro del panel puede desplazarse en horizontal */
+.probar-salida .tabla { display: block; overflow-x: auto; white-space: nowrap; }
+
+@media (max-width: 760px) {
+  .probar { grid-template-columns: 1fr; }
+  .probar-salida { position: static; max-height: none; }
+}
 
 /* Tienda: chips de categoría y grilla de productos */
 .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0 1.5rem; }
@@ -261,3 +306,12 @@ code {
 }
 .tabla th { color: var(--tenue); font-weight: 600; }
 .tabla td { font-family: ui-monospace, monospace; }
+
+.aviso-seguro {
+  background: rgba(34, 197, 94, 0.12);
+  border-bottom: 1px solid var(--verde);
+  color: #bbf7d0;
+  text-align: center;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+}

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block titulo %}V05 · Deserialización insegura{% endblock %}
+{% block titulo %}V05 · Deserialización (corregida){% endblock %}
 
 {% block contenido %}
 <p><a class="volver" href="{{ url_for('lecciones') }}">← Volver a las lecciones</a></p>
@@ -7,21 +7,41 @@
 
 <p class="intro">
   Pega un "carrito guardado" y el backend lo restaura con <code>json.loads()</code>. JSON solo
-  describe datos: leerlo <strong>nunca ejecuta código</strong>. Prueba el carrito normal, y luego
-  el carrito de ataque de la versión insegura: aquí no ejecuta nada, solo da un error de formato.
+  describe datos: leerlo <strong>nunca ejecuta código</strong>.
 </p>
 
+<h2 class="subt">Pruébalo aquí</h2>
+<p class="intro">
+  Pega tu propio carrito, o pulsa <strong>Ejecutar</strong> en cualquier ejemplo (puedes editarlo
+  antes). El resultado aparece justo debajo, sin salir de esta página.
+</p>
+
+<div class="probar">
+<div class="probar-controles">
 <form class="demo-form" method="post" action="{{ url_for('v05_deserializacion') }}">
   <input type="text" name="datos" value="{{ datos }}" placeholder='{"producto": "FE-001", "cantidad": 2}' autofocus>
-  <button class="boton" type="submit">Restaurar</button>
+  <button class="boton" type="submit">Ejecutar</button>
 </form>
 
-<p>1. Carrito normal (JSON):</p>
-<div class="resultado">{"producto": "FE-001", "cantidad": 2}</div>
-
-<p>2. El carrito de ataque de la versión insegura (base64 con un pickle): pégalo y verás que aquí
-   <strong>no ejecuta nada</strong>, solo falla al no ser JSON válido:</p>
-<div class="resultado">gAWVKwAAAAAAAACMCnN1YnByb2Nlc3OUjAxjaGVja19vdXRwdXSUk5RdlIwCaWSUYYWUUpQu</div>
+<ul class="ejemplos">
+  <li>
+    <span class="ej-cap">Carrito normal en JSON (da <code>{'producto': 'FE-001', 'cantidad': 2}</code>):</span>
+    <form class="demo-form" method="post" action="{{ url_for('v05_deserializacion') }}">
+      <input type="text" name="datos" value='{"producto": "FE-001", "cantidad": 2}'>
+      <button class="boton boton-sec" type="submit">Ejecutar</button>
+    </form>
+  </li>
+  <li>
+    <span class="ej-cap">El pickle de ataque de la versión insegura: aquí <strong>no ejecuta nada</strong>, solo da error de formato:</span>
+    <form class="demo-form" method="post" action="{{ url_for('v05_deserializacion') }}">
+      <input type="text" name="datos" value="gAWVKwAAAAAAAACMCnN1YnByb2Nlc3OUjAxjaGVja19vdXRwdXSUk5RdlIwCaWSUYYWUUpQu">
+      <button class="boton boton-sec" type="submit">Ejecutar</button>
+    </form>
+  </li>
+</ul>
+</div>
+<div class="probar-salida">
+{% if not datos %}<p class="vacio">Pulsa <strong>Ejecutar</strong> para ver aquí el resultado.</p>{% endif %}
 
 {% if error %}
 <p>Error (esperado con datos que no son JSON):</p>
@@ -30,6 +50,8 @@
 <p>Objeto que devolvió <code>json.loads()</code>:</p>
 <div class="resultado">{{ objeto }}</div>
 {% endif %}
+</div>
+</div>
 
 <section class="explica">
   <h3>Qué estaba mal</h3>
@@ -43,10 +65,22 @@
 
   <h3>Cómo comprobarlo <span class="donde">la página + el contenedor</span></h3>
   <ol>
-    <li>Pega el carrito de ataque (2): antes ejecutaba <code>id</code>; aquí solo da un error de
-      formato, sin correr nada.</li>
-    <li>Confirma que nada se ejecutó (no aparecen procesos ni archivos nuevos):
+    <li>Pega el pickle de ataque (segundo ejemplo): antes ejecutaba <code>id</code>; aquí solo da un
+      error de formato, sin correr nada.</li>
+    <li>Confirma que nada se ejecutó (no aparecen archivos nuevos):
       {% raw %}<pre class="codigo-bloque">rtk docker compose -f seguro/compose.yml --env-file seguro/.env.example exec web ls -l /tmp</pre>{% endraw %}</li>
   </ol>
+
+  <h3>Detalles que verás <span class="donde">para no confundirse</span></h3>
+  <ul>
+    <li>Con el pickle de ataque verás un error tipo
+      <code>JSONDecodeError: Expecting value...</code>: es <code>json.loads()</code> diciendo "esto
+      no es JSON". No ejecutó nada; solo rechazó el dato.</li>
+    <li>El carrito normal devuelve <code>{'producto': 'FE-001', 'cantidad': 2}</code>: un diccionario
+      de Python leído como datos.</li>
+  </ul>
+
+  <h3>Qué tan grave era <span class="sev sev-critica">Crítica</span></h3>
+  <p>Con pickle, ejecución de código con solo enviar datos. Con JSON, ese riesgo desaparece.</p>
 </section>
 {% endblock %}
