@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block titulo %}V03 · Secretos en el código{% endblock %}
+
+{% block contenido %}
+<p><a class="volver" href="{{ url_for('lecciones') }}">← Volver a las lecciones</a></p>
+<h1>V03 · Pasarela de pagos <span class="codigo">Secreto en el código</span></h1>
+
+<p class="intro">
+  Esta pantalla muestra la clave que la app usa para cobrar. Está <strong>escrita dentro del
+  código</strong> (<code>app.py</code>), no en una variable de entorno. Por eso aparece aquí, y
+  también la vería cualquiera que lea el repositorio o su historial.
+</p>
+
+<p>Clave que la app tiene guardada:</p>
+<div class="resultado">API_KEY_PASARELA = {{ api_key }}</div>
+
+<section class="explica">
+  <h3>Qué está mal</h3>
+  <p>El secreto es una constante en el código fuente.</p>
+  {% raw %}<pre class="codigo-bloque">API_KEY_PASARELA = "sk-FALSO-pagos-9c8b7a6d5e4f3210"</pre>{% endraw %}
+
+  <h3>Qué pasa por debajo</h3>
+  <p>Un secreto en el código viaja en cada copia del repositorio y queda registrado en el historial
+  de git <strong>para siempre</strong>: aunque después lo borres del archivo, sigue en los commits
+  anteriores. Cualquiera con acceso al repo (o a un backup, o a un fork) lo tiene.</p>
+
+  <h3>Cómo verlo <span class="donde">terminal / git</span></h3>
+  <ol>
+    <li>Buscarlo en el código:
+      {% raw %}<pre class="codigo-bloque">rtk grep -rn "sk-FALSO" inseguro/</pre>{% endraw %}</li>
+    <li>Verlo en el historial (sigue ahí aunque lo borres del archivo):
+      {% raw %}<pre class="codigo-bloque">rtk git log -p -- inseguro/app.py</pre>{% endraw %}</li>
+  </ol>
+  <p>No aplica pgAdmin: no es un dato de la base, es del código.</p>
+
+  <h3>Qué tan grave es <span class="sev sev-alta">Alta</span></h3>
+  <p>Quien vea el secreto puede usar el servicio (aquí, cobrar con la pasarela). Rotarlo obliga a
+  cambiar la clave en el proveedor y, para borrar el rastro, reescribir el historial de git.</p>
+
+  <h3>Cómo se arregla</h3>
+  <div class="arreglo">Leer la clave de una variable de entorno
+  (<code>os.environ["API_KEY_PASARELA"]</code>) y ponerla en <code>.env</code>, que está fuera de git
+  (igual que las credenciales de la base en este mismo proyecto).</div>
+</section>
+{% endblock %}

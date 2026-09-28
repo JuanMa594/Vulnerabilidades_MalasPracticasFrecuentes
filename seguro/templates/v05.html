@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block titulo %}V05 · Deserialización insegura{% endblock %}
+
+{% block contenido %}
+<p><a class="volver" href="{{ url_for('lecciones') }}">← Volver a las lecciones</a></p>
+<h1>V05 · Restaurar carrito <span class="codigo">Deserialización (corregida)</span></h1>
+
+<p class="intro">
+  Pega un "carrito guardado" y el backend lo restaura con <code>json.loads()</code>. JSON solo
+  describe datos: leerlo <strong>nunca ejecuta código</strong>. Prueba el carrito normal, y luego
+  el carrito de ataque de la versión insegura: aquí no ejecuta nada, solo da un error de formato.
+</p>
+
+<form class="demo-form" method="post" action="{{ url_for('v05_deserializacion') }}">
+  <input type="text" name="datos" value="{{ datos }}" placeholder='{"producto": "FE-001", "cantidad": 2}' autofocus>
+  <button class="boton" type="submit">Restaurar</button>
+</form>
+
+<p>1. Carrito normal (JSON):</p>
+<div class="resultado">{"producto": "FE-001", "cantidad": 2}</div>
+
+<p>2. El carrito de ataque de la versión insegura (base64 con un pickle): pégalo y verás que aquí
+   <strong>no ejecuta nada</strong>, solo falla al no ser JSON válido:</p>
+<div class="resultado">gAWVKwAAAAAAAACMCnN1YnByb2Nlc3OUjAxjaGVja19vdXRwdXSUk5RdlIwCaWSUYYWUUpQu</div>
+
+{% if error %}
+<p>Error (esperado con datos que no son JSON):</p>
+<div class="resultado">{{ error }}</div>
+{% elif objeto %}
+<p>Objeto que devolvió <code>json.loads()</code>:</p>
+<div class="resultado">{{ objeto }}</div>
+{% endif %}
+
+<section class="explica">
+  <h3>Qué estaba mal</h3>
+  <p>La versión insegura usaba <code>pickle.loads()</code>, que puede ejecutar código al
+  deserializar.</p>
+
+  <h3>Cómo se corrigió</h3>
+  <div class="arreglo">Se usa JSON, un formato que solo representa datos (números, textos, listas,
+  diccionarios) y nunca ejecuta funciones.
+  {% raw %}<pre class="codigo-bloque">objeto = json.loads(datos)   # solo lee datos; no hay __reduce__ ni código</pre>{% endraw %}</div>
+
+  <h3>Cómo comprobarlo <span class="donde">la página + el contenedor</span></h3>
+  <ol>
+    <li>Pega el carrito de ataque (2): antes ejecutaba <code>id</code>; aquí solo da un error de
+      formato, sin correr nada.</li>
+    <li>Confirma que nada se ejecutó (no aparecen procesos ni archivos nuevos):
+      {% raw %}<pre class="codigo-bloque">rtk docker compose -f seguro/compose.yml --env-file seguro/.env.example exec web ls -l /tmp</pre>{% endraw %}</li>
+  </ol>
+</section>
+{% endblock %}

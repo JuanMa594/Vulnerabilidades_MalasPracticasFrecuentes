@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block titulo %}Tienda{% endblock %}
+
+{% block contenido %}
+<h1>Inventario de la tienda</h1>
+<p class="intro">
+  {{ productos|length }} productos. Esta es la <strong>versión insegura</strong>: se ve igual que la
+  segura, pero por dentro tiene los fallos. Las demos están en <a href="{{ url_for('lecciones') }}">Lecciones</a>.
+</p>
+
+<div class="chips">
+  <a class="chip {% if not categoria %}chip-activo{% endif %}" href="{{ url_for('index') }}">Todos</a>
+  {% for c in categorias %}
+  <a class="chip {% if c == categoria %}chip-activo{% endif %}" href="{{ url_for('index', categoria=c) }}">{{ c }}</a>
+  {% endfor %}
+</div>
+
+{% if error %}
+<div class="resultado">No se pudo cargar el inventario: {{ error }}</div>
+{% endif %}
+
+<ul class="productos">
+  {% for sku, nombre, categoria, precio, stock, imagen in productos %}
+  <li class="producto">
+    <div class="foto">
+      <img src="{{ url_for('static', filename='img/' ~ imagen) }}" alt="{{ nombre }}" loading="lazy">
+    </div>
+    <div class="cuerpo">
+      <span class="cat">{{ categoria }}</span>
+      <h2>{{ nombre }}</h2>
+      <span class="sku">{{ sku }}</span>
+      <div class="fila">
+        <span class="precio">$ {{ "{:,.0f}".format(precio) }}</span>
+        <span class="stock {% if stock <= 20 %}stock-bajo{% endif %}">{{ stock }} en stock</span>
+      </div>
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+{% endblock %}

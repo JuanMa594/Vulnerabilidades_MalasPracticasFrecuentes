@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block titulo %}V08 · Mutable por defecto{% endblock %}
+
+{% block contenido %}
+<p><a class="volver" href="{{ url_for('lecciones') }}">← Volver a las lecciones</a></p>
+<h1>V08 · Cotización temporal <span class="codigo">Mutable por defecto</span></h1>
+
+<p class="intro">
+  Agrega un producto a una cotización que <strong>debería empezar vacía</strong> en cada visita.
+  Pero la función usa <code>cotizacion=[]</code> como valor por defecto, y esa lista se comparte
+  entre llamadas. Agrega <code>martillo</code>, luego <code>taladro</code>, y verás que la lista
+  crece en vez de reiniciarse.
+</p>
+
+<form class="demo-form" method="get" action="{{ url_for('v08_mutable_default') }}">
+  <input type="text" name="item" placeholder="martillo" autofocus>
+  <button class="boton" type="submit">Agregar a la cotización</button>
+</form>
+
+{% if item %}
+<p>Cotización que devolvió el backend:</p>
+<div class="resultado">{{ cotizacion }}</div>
+<p class="nota">Debería tener solo <code>{{ item }}</code>. Si tiene más, son de peticiones anteriores.</p>
+{% endif %}
+
+<section class="explica">
+  <h3>Qué está mal</h3>
+  <p>El valor por defecto de un parámetro es una lista (un objeto mutable).</p>
+  {% raw %}<pre class="codigo-bloque">def agregar_a_cotizacion(item, cotizacion=[]):
+    cotizacion.append(item)
+    return cotizacion</pre>{% endraw %}
+
+  <h3>Qué pasa por debajo</h3>
+  <p>El <code>[]</code> por defecto se crea <strong>una sola vez</strong>, cuando se define la
+  función, y esa misma lista se reutiliza en todas las llamadas. Como el servidor es un proceso que
+  vive entre peticiones, la lista va acumulando lo de cada visita, incluso de personas distintas.</p>
+
+  <h3>Cómo verlo <span class="donde">la página (memoria del proceso)</span></h3>
+  <ol>
+    <li>Agrega <code>martillo</code>. Luego, en otra petición, agrega <code>taladro</code>: la
+      cotización muestra los dos, no solo el último.</li>
+    <li>Sigue agregando: nunca se reinicia. No es de base de datos: vive en la memoria del proceso,
+      por eso se observa recargando la página.</li>
+  </ol>
+
+  <h3>Qué tan grave es <span class="sev sev-media">Media</span></h3>
+  <p>No es un agujero de seguridad clásico, pero mezcla datos entre usuarios y peticiones (una
+  persona ve ítems de otra) y produce resultados incorrectos. Es un bug clásico que sorprende a
+  todos.</p>
+
+  <h3>Cómo se arregla</h3>
+  <div class="arreglo">Usar <code>None</code> como valor por defecto y crear la lista dentro:
+  {% raw %}<pre class="codigo-bloque">def agregar_a_cotizacion(item, cotizacion=None):
+    if cotizacion is None:
+        cotizacion = []
+    cotizacion.append(item)
+    return cotizacion</pre>{% endraw %}</div>
+</section>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block titulo %}V04 · SQL Injection{% endblock %}
+
+{% block contenido %}
+<p><a class="volver" href="{{ url_for('lecciones') }}">← Volver a las lecciones</a></p>
+<h1>V04 · Buscar productos <span class="codigo">SQL Injection</span></h1>
+
+<p class="intro">
+  Busca un producto por su nombre. La consulta se arma <strong>pegando tu texto</strong> dentro del
+  SQL, así que no solo buscas: puedes cambiar la consulta. Prueba <code>martillo</code>, luego
+  <code>' OR '1'='1</code>, y por último el ataque de abajo para robar contraseñas.
+</p>
+
+<form class="demo-form" method="get" action="{{ url_for('v04_sql_injection') }}">
+  <input type="text" name="q" value="{{ termino }}" placeholder="martillo" autofocus>
+  <button class="boton" type="submit">Buscar</button>
+</form>
+
+{% if sql %}
+<p>Consulta que ejecutó el backend (Python):</p>
+<div class="resultado">{{ sql }}</div>
+{% endif %}
+
+{% if error %}
+<p>La base de datos respondió con un error:</p>
+<div class="resultado">{{ error }}</div>
+{% elif termino %}
+<p>{{ filas|length }} resultado(s):</p>
+{% if filas %}
+<table class="tabla">
+  <thead><tr><th>id</th><th>sku</th><th>nombre</th><th>categoría</th><th>precio</th><th>stock</th><th>imagen</th></tr></thead>
+  <tbody>
+    {% for f in filas %}
+    <tr>{% for celda in f %}<td>{{ celda }}</td>{% endfor %}</tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endif %}
+
+<section class="explica">
+  <h3>Qué está mal</h3>
+  <p>La consulta se construye con un f-string que mete el texto del usuario dentro del SQL.</p>
+  {% raw %}<pre class="codigo-bloque">sql = f"SELECT * FROM productos WHERE nombre ILIKE '%{termino}%'"</pre>{% endraw %}
+
+  <h3>Qué pasa por debajo</h3>
+  <p>Tu texto deja de ser un dato y pasa a ser parte de la instrucción. Con <code>' OR '1'='1</code>
+  el filtro se vuelve siempre verdadero y devuelve todo. Peor: con <code>UNION</code> se leen
+  <strong>otras tablas</strong>, como <code>usuarios</code> (¡con las contraseñas!).</p>
+
+  <h3>Cómo verlo <span class="donde">pgAdmin</span></h3>
+  <ol>
+    <li>En el Query Tool de pgAdmin, corre la misma consulta que arma la app con
+      <code>' OR '1'='1</code>:
+      {% raw %}<pre class="codigo-bloque">SELECT * FROM productos WHERE nombre ILIKE '%' OR '1'='1%';</pre>{% endraw %}
+      Devuelve los 18, no uno.</li>
+    <li>Para <strong>robar contraseñas</strong>, pega esto en el buscador de arriba:
+      {% raw %}<pre class="codigo-bloque">zzz' UNION SELECT id, nombre, password, rol, 0, 0, '' FROM usuarios -- </pre>{% endraw %}
+      En la columna "nombre" verás los usuarios y donde iría el nombre saldrá la contraseña
+      (<code>admin-secreto-demo</code>).</li>
+    <li>Compáralo en pgAdmin con lo que había:
+      {% raw %}<pre class="codigo-bloque">SELECT nombre, password, rol FROM usuarios;</pre>{% endraw %}</li>
+  </ol>
+
+  <h3>Qué tan grave es <span class="sev sev-critica">Crítica</span></h3>
+  <p>Permite leer y alterar toda la base, incluidas credenciales. Es una de las vulnerabilidades más
+  explotadas del mundo real.</p>
+
+  <h3>Cómo se arregla</h3>
+  <div class="arreglo">Consulta parametrizada: el texto viaja aparte y el driver nunca lo trata como
+  SQL.
+  {% raw %}<pre class="codigo-bloque">cur.execute(
+    "SELECT * FROM productos WHERE nombre ILIKE %s",
+    (f"%{termino}%",),
+)</pre>{% endraw %}</div>
+</section>
+{% endblock %}

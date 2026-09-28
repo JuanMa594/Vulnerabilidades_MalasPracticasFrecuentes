@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block titulo %}V02 · Inyección de código{% endblock %}
+
+{% block contenido %}
+<p><a class="volver" href="{{ url_for('lecciones') }}">← Volver a las lecciones</a></p>
+<h1>V02 · Calculadora de descuentos <span class="codigo">Inyección de código</span></h1>
+
+<p class="intro">
+  Escribe una fórmula para calcular un precio con descuento. El backend la <strong>evalúa con
+  <code>eval()</code></strong>, así que no calcula: ejecuta lo que escribas. Prueba primero con
+  <code>1000 * 0.9</code> y luego con
+  <code>__import__('subprocess').check_output(['id'])</code>.
+</p>
+
+<form class="demo-form" method="get" action="{{ url_for('v02_inyeccion_codigo') }}">
+  <input type="text" name="formula" value="{{ formula }}" placeholder="1000 * 0.9" autofocus>
+  <button class="boton" type="submit">Calcular</button>
+</form>
+
+{% if error %}
+<p>Error:</p>
+<div class="resultado">{{ error }}</div>
+{% elif resultado %}
+<p>Resultado que devolvió <code>eval()</code>:</p>
+<div class="resultado">{{ resultado }}</div>
+{% endif %}
+
+<section class="explica">
+  <h3>Qué está mal</h3>
+  <p>La fórmula del usuario se pasa directo a <code>eval()</code>.</p>
+  {% raw %}<pre class="codigo-bloque">resultado = repr(eval(formula))   # 'formula' viene del usuario</pre>{% endraw %}
+
+  <h3>Qué pasa por debajo</h3>
+  <p><code>eval()</code> compila y ejecuta el texto como código Python, con todos los permisos del
+  proceso. <code>__import__('subprocess').check_output(['id'])</code> importa el módulo
+  <code>subprocess</code> y ejecuta el comando <code>id</code> del sistema operativo. Cualquier
+  expresión vale: leer variables, abrir archivos, ejecutar comandos.</p>
+
+  <h3>Cómo verlo <span class="donde">la página + el contenedor</span></h3>
+  <ol>
+    <li>La página muestra la salida del comando: <code>uid=1000(app) gid=1000(app)...</code>.</li>
+    <li>Confirma quién lo ejecuta:
+      {% raw %}<pre class="codigo-bloque">rtk docker compose -f inseguro/compose.yml --env-file inseguro/.env.example exec web whoami</pre>{% endraw %}
+      (responde <code>app</code>: el atacante ejecuta como ese usuario dentro del contenedor).</li>
+    <li>Lista el sistema de archivos del contenedor con
+      <code>__import__('os').listdir('/')</code>.</li>
+  </ol>
+
+  <h3>Qué tan grave es <span class="sev sev-critica">Crítica</span></h3>
+  <p>Ejecución de código arbitrario (RCE): el atacante controla el proceso. Aquí el daño quedó
+  contenido porque el contenedor corre como usuario sin privilegios (<code>app</code>), no root.</p>
+
+  <h3>Cómo se arregla</h3>
+  <div class="arreglo">Nunca <code>eval()</code> sobre entrada externa. Para "solo cuentas" se usa
+  <code>ast.literal_eval</code> (solo literales) o un parser/validador propio. Para comandos, nunca
+  armar cadenas: <code>subprocess</code> con lista de argumentos y sin <code>shell=True</code>.</div>
+</section>
+{% endblock %}

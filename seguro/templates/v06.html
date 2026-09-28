@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block titulo %}V06 · Path traversal{% endblock %}
+
+{% block contenido %}
+<p><a class="volver" href="{{ url_for('lecciones') }}">← Volver a las lecciones</a></p>
+<h1>V06 · Ficha técnica <span class="codigo">Path traversal</span></h1>
+
+<p class="intro">
+  Descarga la ficha técnica de un producto escribiendo el nombre del archivo. La ruta se arma
+  <strong>pegando tu texto</strong>, sin comprobar que se quede dentro de la carpeta de fichas.
+  Prueba con <code>FE-001.txt</code> y luego con <code>../../../etc/passwd</code>.
+</p>
+
+<p>Fichas disponibles: {% for f in disponibles %}<code>{{ f }}</code> {% endfor %}</p>
+
+<form class="demo-form" method="get" action="{{ url_for('v06_path_traversal') }}">
+  <input type="text" name="archivo" value="{{ nombre }}" placeholder="FE-001.txt" autofocus>
+  <button class="boton" type="submit">Ver ficha</button>
+</form>
+
+{% if ruta %}
+<p>Ruta que abrió el backend:</p>
+<div class="resultado">{{ ruta }}</div>
+{% endif %}
+
+{% if error %}
+<p>Error:</p>
+<div class="resultado">{{ error }}</div>
+{% elif contenido %}
+<p>Contenido del archivo:</p>
+<div class="resultado">{{ contenido }}</div>
+{% endif %}
+
+<section class="explica">
+  <h3>Qué está mal</h3>
+  <p>La ruta se arma concatenando el nombre que dio el usuario, sin validar.</p>
+  {% raw %}<pre class="codigo-bloque">ruta = f"{FICHAS_DIR}/{nombre}"   # 'nombre' viene del usuario
+open(ruta)</pre>{% endraw %}
+
+  <h3>Qué pasa por debajo</h3>
+  <p><code>..</code> significa "carpeta de arriba". Con <code>../../../etc/passwd</code> se sale del
+  directorio de fichas y se sube hasta la raíz, para abrir cualquier archivo que el proceso pueda
+  leer. La app creía que solo servía fichas de productos.</p>
+
+  <h3>Cómo verlo <span class="donde">la página</span></h3>
+  <ol>
+    <li>Escribe <code>../../../etc/passwd</code>: verás el archivo de usuarios del sistema. Arriba se
+      muestra la ruta que realmente se abrió.</li>
+    <li>Lee el propio código de la app: <code>../app.py</code> (incluye el secreto de V03).</li>
+  </ol>
+
+  <h3>Qué tan grave es <span class="sev sev-alta">Alta</span></h3>
+  <p>Lectura de archivos arbitrarios: código fuente, configuraciones, claves. Muchas veces es el
+  primer paso para encontrar otro fallo mayor.</p>
+
+  <h3>Cómo se arregla</h3>
+  <div class="arreglo">Validar que la ruta final quede dentro de la carpeta permitida: resolver la
+  ruta real (<code>os.path.realpath</code>) y comprobar que empiece por <code>FICHAS_DIR</code>, o
+  aceptar solo nombres de una lista blanca.</div>
+</section>
+{% endblock %}

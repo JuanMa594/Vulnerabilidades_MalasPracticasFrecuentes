@@ -5,6 +5,57 @@ Registro de lo que se hace en cada sesión, por qué se hizo así y qué queda p
 
 ---
 
+## 2026-09-27 · Sesión 20: versión SEGURA completa (seguro/) y verificada
+
+### Qué se hizo
+
+Se creó `seguro/` copiando `inseguro/` y aplicando las 9 correcciones, cada una marcada
+`# SEGURO Vxx`. Corre en su propio compose (proyecto `vulns-seguro`, Flask **8012**, pgAdmin
+**5052**, Postgres sin puerto). Se levantó junto a la insegura (8011) sin conflicto.
+
+Las correcciones (en `seguro/app.py`):
+
+| Vuln | Corrección |
+|---|---|
+| V01 | `app.run()` dentro de `if __name__ == "__main__":` |
+| V02 | evaluador aritmético propio con `ast` (solo números y `+ - * / ( )`); nunca `eval` |
+| V03 | la clave sale de `os.environ`; la página la enmascara (`…3210`) |
+| V04 | consulta parametrizada (`%s`); el término viaja como dato |
+| V05 | `json.loads` (JSON solo describe datos) en vez de `pickle` |
+| V06 | `realpath` + exigir que la ruta quede dentro de `FICHAS_DIR` |
+| V07 | `except ValueError` concreto y confirmar solo si de verdad se actualizó |
+| V08 | `cotizacion=None` y crear la lista dentro de la función |
+| V09 | `hmac.compare_digest` para el secreto y `==` para el rol |
+
+### Verificado en vivo (mismos ataques contra 8012)
+
+Todos los ataques que funcionaban en 8011 **fallan** en 8012, y lo normal sigue andando:
+- V02: `1000*0.9` → 900.0; el ataque `__import__(...)` → "Solo se permiten números...".
+- V03: la página muestra `…3210`, no la clave completa.
+- V04: `' OR '1'='1` → 0 productos; el `UNION` → 0 filas, 0 contraseñas.
+- V05: JSON normal se lee; el pickle de ataque no ejecuta nada.
+- V06: `../../../etc/passwd` → "Ruta no permitida"; `FE-001.txt` sí abre.
+- V07: `precio=abc` → "El precio debe ser un número" (sin mentir).
+- V08: dos peticiones (`alfa`, `beta`) → la cotización muestra solo `['beta']`.
+- V09: admin entra y **sí** es reconocido como admin.
+
+### Diseño
+
+- `git diff --no-index inseguro/app.py seguro/app.py` muestra solo las correcciones: esa es la
+  comparación para la clase.
+- Plantillas: iguales salvo `base.html` (badge verde + aviso "versión corregida") y `v05.html`
+  (ejemplos en JSON, porque cambió el formato). El resto del front es idéntico.
+- ruff y ty pasan **sin ningún `# noqa`** (prohibidos en la versión segura).
+- ty obligó a separar los operadores del evaluador V02 en binarios/unarios (un diccionario mezclaba
+  aridades y no validaba la llamada).
+
+### Pendiente
+
+- Falta la parte ACID (`movimientos` en transacción): sería una función nueva en ambas apps (V10).
+- Pruebas automatizadas por `Vxx` (una sola orden que ataque las dos apps) y fichas en `docs/vulns/`.
+
+---
+
 ## 2026-09-27 · Sesión 19: cada demo autocontenida (qué pasa, cómo verlo, gravedad)
 
 ### Qué se hizo

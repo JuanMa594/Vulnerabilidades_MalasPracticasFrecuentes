@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block titulo %}V07 · except demasiado amplio{% endblock %}
+
+{% block contenido %}
+<p><a class="volver" href="{{ url_for('lecciones') }}">← Volver a las lecciones</a></p>
+<h1>V07 · Cambiar precio <span class="codigo">except demasiado amplio</span></h1>
+
+<p class="intro">
+  Cambia el precio de un producto por su SKU. Si algo falla, el backend se lo traga con
+  <code>except: pass</code> y <strong>siempre dice "guardado"</strong>. Prueba con un precio válido
+  (<code>30000</code>) y luego con uno inválido (<code>abc</code>): mira la tabla y verás que en el
+  segundo caso el precio no cambió, aunque el mensaje diga que sí.
+</p>
+
+<form class="demo-form" method="post" action="{{ url_for('v07_except_amplio') }}">
+  <input type="text" name="sku" placeholder="FE-001" autofocus>
+  <input type="text" name="precio" placeholder="30000">
+  <button class="boton" type="submit">Guardar</button>
+</form>
+
+{% if mensaje %}
+<div class="resultado">{{ mensaje }}</div>
+{% endif %}
+
+<p>Precios actuales:</p>
+<table class="tabla">
+  <thead><tr><th>sku</th><th>nombre</th><th>precio</th></tr></thead>
+  <tbody>
+    {% for sku, nombre, precio in productos %}
+    <tr><td>{{ sku }}</td><td>{{ nombre }}</td><td>{{ precio }}</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<section class="explica">
+  <h3>Qué está mal</h3>
+  <p>Un <code>except</code> sin tipo se traga cualquier error y no hace nada.</p>
+  {% raw %}<pre class="codigo-bloque">try:
+    precio = float(nuevo)
+    cur.execute("UPDATE productos SET precio = %s WHERE sku = %s", (precio, sku))
+except:          # atrapa TODO
+    pass         # y lo ignora
+mensaje = "Precio actualizado."   # se muestra pase lo que pase</pre>{% endraw %}
+
+  <h3>Qué pasa por debajo</h3>
+  <p>Si <code>float("abc")</code> falla (o falla el UPDATE), la excepción se descarta y el programa
+  sigue como si nada. El mensaje "Precio actualizado" se muestra igual, así que la interfaz
+  <strong>miente</strong>: dice que guardó cuando no guardó.</p>
+
+  <h3>Cómo verlo <span class="donde">pgAdmin</span></h3>
+  <ol>
+    <li>En pgAdmin, mira el precio actual:
+      {% raw %}<pre class="codigo-bloque">SELECT sku, precio FROM productos WHERE sku = 'FE-001';</pre>{% endraw %}</li>
+    <li>En la demo, cambia <code>FE-001</code> a <code>abc</code> y Guarda: dice "Precio actualizado".</li>
+    <li>Vuelve a correr el SELECT: el precio <strong>no cambió</strong>. Con <code>30000</code> sí
+      cambia. La base delata la mentira.</li>
+  </ol>
+
+  <h3>Qué tan grave es <span class="sev sev-media">Media</span></h3>
+  <p>Fallos silenciosos: datos que "no se guardan" sin aviso, bugs imposibles de depurar, y encima
+  oculta errores de seguridad (por ejemplo, un fallo al validar permisos que nadie ve).</p>
+
+  <h3>Cómo se arregla</h3>
+  <div class="arreglo">Capturar la excepción específica y actuar: mostrar o registrar el error y no
+  afirmar que se guardó.
+  {% raw %}<pre class="codigo-bloque">try:
+    precio = float(nuevo)
+except ValueError:
+    mensaje = "El precio debe ser un número."</pre>{% endraw %}</div>
+</section>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block titulo %}V01 · Sin __main__{% endblock %}
+
+{% block contenido %}
+<p><a class="volver" href="{{ url_for('lecciones') }}">← Volver a las lecciones</a></p>
+<h1>V01 · Arranque sin guardia <span class="codigo">Sin if __name__ == "__main__"</span></h1>
+
+<p class="intro">
+  Este fallo no tiene formulario: está en la estructura del archivo <code>app.py</code>. Aquí se
+  explica qué provoca y cómo comprobarlo.
+</p>
+
+<section class="explica">
+  <h3>Qué está mal</h3>
+  <p>El servidor se arranca en el nivel superior del módulo, sin protegerlo con la guardia
+  <code>if __name__ == "__main__":</code>.</p>
+  {% raw %}<pre class="codigo-bloque"># inseguro/app.py (al final del archivo, sin guardia)
+print("[inseguro] módulo cargado: arrancando el servidor...")
+app.run(host=..., port=...)</pre>{% endraw %}
+
+  <h3>Qué pasa por debajo</h3>
+  <p>Al <strong>importar</strong> un módulo, Python ejecuta todo su nivel superior. Como
+  <code>app.run()</code> está suelto, cualquiera que haga <code>from inseguro.app import app</code>
+  —un servidor de producción como gunicorn, o una prueba— no obtiene el objeto <code>app</code>:
+  en su lugar arranca el servidor de desarrollo y el programa queda colgado ahí. Además, cualquier
+  efecto secundario del nivel superior (aquí un <code>print</code>; en un caso real, migraciones o
+  conexiones) se dispara sin querer.</p>
+
+  <h3>Cómo verlo <span class="donde">logs del contenedor</span></h3>
+  <ol>
+    <li>Mira el arranque del contenedor:
+      {% raw %}<pre class="codigo-bloque">rtk docker compose -f inseguro/compose.yml --env-file inseguro/.env.example logs web | head</pre>{% endraw %}
+      Verás impresa la línea <code>[inseguro] módulo cargado: arrancando el servidor...</code>: es
+      un efecto secundario que ocurrió solo por cargar el módulo.</li>
+    <li>En una terminal, <code>python -c "import inseguro.app"</code> se quedaría colgado: importar
+      = arrancar el servidor.</li>
+  </ol>
+
+  <h3>Qué tan grave es <span class="sev sev-media">Media</span></h3>
+  <p>No es un agujero de seguridad directo, pero rompe las pruebas, impide desplegar con un servidor
+  de producción y hace imposible reutilizar el módulo. Es la mala práctica más común al empezar, y
+  la raíz de bugs difíciles de entender.</p>
+
+  <h3>Cómo se arregla</h3>
+  <div class="arreglo">En la versión segura, el arranque va protegido:
+  {% raw %}<pre class="codigo-bloque">if __name__ == "__main__":
+    app.run(host=..., port=...)</pre>{% endraw %}
+  Así el módulo se puede importar sin efectos y el servidor solo arranca cuando se ejecuta a propósito.</div>
+</section>
+{% endblock %}
