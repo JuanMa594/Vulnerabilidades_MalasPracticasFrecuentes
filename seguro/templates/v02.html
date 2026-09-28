@@ -46,6 +46,20 @@
       <code>__import__('os').listdir('/')</code>.</li>
   </ol>
 
+  <h3>Detalles que verás <span class="donde">para no confundirse</span></h3>
+  <ul>
+    <li>La salida aparece como <code>b'uid=1000(app)...\n'</code>: la <code>b'...'</code> significa
+      que son <strong>bytes</strong> (lo que devuelven los comandos) y <code>\n</code> es el salto de
+      línea. Es normal.</li>
+    <li>Si usas <code>__import__('os').system('id')</code>, la página muestra solo <code>0</code> (el
+      código de salida). La salida real del comando <strong>se va a los logs del contenedor</strong>:
+      {% raw %}<pre class="codigo-bloque">rtk docker compose -f inseguro/compose.yml --env-file inseguro/.env.example logs web | grep uid=</pre>{% endraw %}
+      Por eso el ejemplo usa <code>check_output</code>, que sí devuelve la salida y se ve en la página.</li>
+    <li><code>eval()</code> evalúa <strong>una sola expresión</strong>, no instrucciones: escribir
+      <code>import os</code> da <code>SyntaxError</code>. Por eso el ataque usa
+      <code>__import__('subprocess')</code> (una expresión) en vez de <code>import subprocess</code>.</li>
+  </ul>
+
   <h3>Qué tan grave es <span class="sev sev-critica">Crítica</span></h3>
   <p>Ejecución de código arbitrario (RCE): el atacante controla el proceso. Aquí el daño quedó
   contenido porque el contenedor corre como usuario sin privilegios (<code>app</code>), no root.</p>
