@@ -5,6 +5,38 @@ Registro de lo que se hace en cada sesión, por qué se hizo así y qué queda p
 
 ---
 
+## 2026-09-28 · Sesión 22: despliegue a prueba de estudiantes (sin .env)
+
+### El problema
+
+Al redesplegar sin `--env-file inseguro/.env.example`, las variables quedaban vacías y **pgAdmin se
+caía** (`Exited (1)`: "You need to define PGADMIN_DEFAULT_EMAIL and PGADMIN_DEFAULT_PASSWORD"), y
+Postgres también fallaría en un arranque fresco. Se sentía como "fallaron las IPs", pero era que el
+`docker compose up` dependía de recordar el `--env-file`.
+
+### El arreglo
+
+Se embebieron **valores por defecto (falsos)** en los dos `compose.yml` con `${VAR:-default}`:
+credenciales de Postgres, correo/clave de pgAdmin y el `API_KEY_PASARELA` de la segura. Ahora
+`docker compose up` funciona **sin `.env` ni `--env-file`**. Los `.env.example` quedaron como
+override opcional.
+
+Los puertos publicados usan `${PUERTO_*:-fijo}`: fijos por defecto (inseguro 8011/5051, seguro
+8012/5052), pero si uno choca se cambia sin editar nada:
+`PUERTO_WEB=8031 rtk docker compose -f inseguro/compose.yml up -d`.
+
+### Verificado desde cero (down -v y up sin --env-file)
+
+Los **6 contenedores** arriba (las dos apps 200, los dos pgAdmin 302 = login), 18 productos en cada
+tienda, y V04 funciona en la insegura (7 SKUs) y falla en la segura (0). El comando de despliegue
+para los estudiantes es ahora una sola línea, sin pasos previos.
+
+### Actualizado
+
+`CLAUDE.md` (Comandos), `.claude/rules/docker.md` (defaults embebidos) y los dos `.env.example`.
+
+---
+
 ## 2026-09-27 · Sesión 21: demos interactivas, retórica unificada y resultado al costado
 
 ### Qué se hizo

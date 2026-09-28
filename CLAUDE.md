@@ -103,11 +103,13 @@ rtk uv run ty check          # tipos
 Los tres últimos deben pasar antes de cada commit. `rtk ruff` directo no sirve: ruff vive en el entorno del proyecto.
 
 ```bash
-# El .env lo crea la persona (Claude lo tiene denegado). Alternativa: --env-file .env.example
-rtk docker compose -f inseguro/compose.yml --env-file inseguro/.env.example up -d --build
-# app en http://127.0.0.1:8011 · pgAdmin en http://127.0.0.1:5051
-rtk docker compose -f inseguro/compose.yml --env-file inseguro/.env.example down
+# Los valores por defecto (falsos) están en el compose: NO hace falta .env ni --env-file.
+rtk docker compose -f inseguro/compose.yml up -d --build   # app 127.0.0.1:8011 · pgAdmin 5051
+rtk docker compose -f seguro/compose.yml   up -d --build   # app 127.0.0.1:8012 · pgAdmin 5052
+rtk docker compose -f inseguro/compose.yml down            # (con -v también borra la base)
 ```
+Puertos fijos: inseguro `8011`/`5051`, seguro `8012`/`5052`. Si alguno estuviera ocupado, se
+cambia sin editar nada: `PUERTO_WEB=8031 rtk docker compose -f inseguro/compose.yml up -d`.
 
 ## Decisiones tomadas
 - **Backend: Flask.** Framework mínimo: las rutas y las consultas se ven en el mismo archivo, sin capas que escondan el fallo. Ideal para nivel introductorio.

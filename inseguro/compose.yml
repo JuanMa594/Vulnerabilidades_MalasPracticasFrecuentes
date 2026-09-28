@@ -1,5 +1,7 @@
-# App INSEGURA. Se levanta sola: rtk docker compose -f inseguro/compose.yml up --build
-# Todo se publica solo en 127.0.0.1 (ver "Solo local, sin excepciones" en CLAUDE.md).
+# App INSEGURA. Funciona a la primera, sin .env:
+#   rtk docker compose -f inseguro/compose.yml up -d --build
+# Todos los valores por defecto son de mentira (ver "Solo local, sin excepciones" en CLAUDE.md).
+# Se pueden sobrescribir con variables de entorno o un .env, pero no hace falta.
 name: vulns-inseguro
 
 services:
@@ -12,11 +14,12 @@ services:
       HOST: "0.0.0.0"   # dentro del contenedor: la red interna de Docker, no la máquina
       PORT: "8000"
       POSTGRES_HOST: db
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-demo}
+      POSTGRES_USER: ${POSTGRES_USER:-demo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-clave_de_demo}
     ports:
-      - "127.0.0.1:8011:8000"
+      # Puerto fijo 8011. Si estuviera ocupado: PUERTO_WEB=8031 docker compose ... up
+      - "127.0.0.1:${PUERTO_WEB:-8011}:8000"
     depends_on:
       db:
         condition: service_healthy
@@ -24,15 +27,15 @@ services:
   db:
     image: postgres:18
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-demo}
+      POSTGRES_USER: ${POSTGRES_USER:-demo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-clave_de_demo}
     volumes:
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
       # Postgres 18 guarda los datos en un subdirectorio: se monta en /var/lib/postgresql.
       - db-data:/var/lib/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-demo} -d ${POSTGRES_DB:-demo}"]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -41,12 +44,13 @@ services:
   pgadmin:
     image: dpage/pgadmin4:9.8
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@ferreteria.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-pgadmin_de_demo}
       PGADMIN_CONFIG_SERVER_MODE: "False"
       PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
     ports:
-      - "127.0.0.1:5051:80"
+      # Puerto fijo 5051. Si estuviera ocupado: PUERTO_PGADMIN=5071 docker compose ... up
+      - "127.0.0.1:${PUERTO_PGADMIN:-5051}:80"
     depends_on:
       - db
 

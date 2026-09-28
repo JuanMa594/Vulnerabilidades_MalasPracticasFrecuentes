@@ -14,5 +14,6 @@ Nada sale de esta máquina: ver "Solo local, sin excepciones" en CLAUDE.md.
 - Postgres no publica puertos: pgAdmin y las apps llegan a él por la red de Docker.
 - Prohibido `network_mode: host`.
 - Imágenes con versión fija (por ejemplo `postgres:18`, `python:3.14-slim`), nunca `latest`.
-- Credenciales desde `.env` (`${POSTGRES_PASSWORD}`); `.env.example` documenta cada variable.
+- Valores por defecto embebidos en el compose con `${VAR:-default}` (todos falsos), para que `docker compose up` funcione sin `.env` ni `--env-file`. El `.env` es solo para sobrescribir.
+- Puertos publicados con `${PUERTO_*:-fijo}`: un puerto fijo por defecto, pero rescatable si choca, sin editar el compose.
 - Las apps no corren como root dentro del contenedor, tampoco la insegura: así el daño de las demos queda contenido.
