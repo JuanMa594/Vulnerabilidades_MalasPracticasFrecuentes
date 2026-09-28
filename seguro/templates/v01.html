@@ -47,6 +47,11 @@ app.run(host=..., port=...)</pre>{% endraw %}
   <p class="nota">Ojo: debe ser desde la raíz. Si lo corres dentro de <code>inseguro/</code>, falla
   con <code>ModuleNotFoundError: No module named 'inseguro'</code>, porque desde ahí ya no existe esa
   carpeta.</p>
+  <p class="nota">El punto de V01 se ve en la línea <code>Running on http://127.0.0.1:8000</code>: el
+  servidor arrancó solo por importar. No hace falta abrir esa página; si la abres, dará
+  <code>500 (KeyError: 'POSTGRES_HOST')</code> porque en este modo corre fuera de Docker, sin base de
+  datos. Eso no es parte de V01. La tienda funcionando está en Docker
+  (<code>http://127.0.0.1:8011</code>).</p>
 
   <h3>Qué tan grave es <span class="sev sev-media">Media</span></h3>
   <p>No es un agujero de seguridad directo, pero rompe las pruebas, impide desplegar con un servidor
