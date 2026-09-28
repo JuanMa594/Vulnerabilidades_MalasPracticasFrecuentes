@@ -44,6 +44,35 @@ app.run(host=..., port=...)</pre>{% endraw %}
 #  * Running on http://127.0.0.1:8000   ← ¡solo por importarlo!  (Ctrl+C para salir)</pre>{% endraw %}
   <p>La app <strong>segura</strong>, en cambio, se importa al instante sin arrancar nada:</p>
   {% raw %}<pre class="codigo-bloque">uv run python -c "import seguro.app"   # termina de inmediato, no arranca el servidor</pre>{% endraw %}
+
+  <p>Son dos formas distintas de correr la app, para dos cosas distintas:</p>
+  <table class="tabla">
+    <thead>
+      <tr>
+        <th></th>
+        <th><code>uv run python -c "import inseguro.app"</code></th>
+        <th>Docker · <code>8011</code></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Para qué sirve</td>
+        <td>ver que importar ya arranca el servidor (V01)</td>
+        <td>usar la tienda completa</td>
+      </tr>
+      <tr>
+        <td>Base de datos</td>
+        <td>❌ no hay: por eso abrir la página da error 500</td>
+        <td>✅ Postgres en el contenedor</td>
+      </tr>
+      <tr>
+        <td>Qué mirar</td>
+        <td>la línea <code>Running on…</code>, y cortar con <kbd>Ctrl+C</kbd></td>
+        <td>las 9 demos funcionando</td>
+      </tr>
+    </tbody>
+  </table>
+
   <p class="nota">Ojo: debe ser desde la raíz. Si lo corres dentro de <code>inseguro/</code>, falla
   con <code>ModuleNotFoundError: No module named 'inseguro'</code>, porque desde ahí ya no existe esa
   carpeta.</p>
