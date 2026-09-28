@@ -7,15 +7,50 @@
 
 <p class="intro">
   Escribe una fórmula para calcular un precio con descuento. El backend la <strong>evalúa con
-  <code>eval()</code></strong>, así que no calcula: ejecuta lo que escribas. Prueba primero con
-  <code>1000 * 0.9</code> y luego con
-  <code>__import__('subprocess').check_output(['id'])</code>.
+  <code>eval()</code></strong>, así que no calcula: ejecuta lo que escribas.
+</p>
+
+<h2 class="subt">Pruébalo aquí</h2>
+<p class="intro">
+  Escribe tu propia fórmula, o pulsa <strong>Ejecutar</strong> en cualquier ejemplo (puedes editarlo
+  antes). El resultado aparece justo debajo, sin salir de esta página.
 </p>
 
 <form class="demo-form" method="get" action="{{ url_for('v02_inyeccion_codigo') }}">
-  <input type="text" name="formula" value="{{ formula }}" placeholder="1000 * 0.9" autofocus>
-  <button class="boton" type="submit">Calcular</button>
+  <input type="text" name="formula" value="{{ formula }}" placeholder="escribe una fórmula" autofocus>
+  <button class="boton" type="submit">Ejecutar</button>
 </form>
+
+<ul class="ejemplos">
+  <li>
+    <span class="ej-cap">Cálculo normal (da <code>900.0</code>):</span>
+    <form class="demo-form" method="get" action="{{ url_for('v02_inyeccion_codigo') }}">
+      <input type="text" name="formula" value="1000 * 0.9">
+      <button class="boton boton-sec" type="submit">Ejecutar</button>
+    </form>
+  </li>
+  <li>
+    <span class="ej-cap">Ataque: ejecuta el comando <code>id</code> y muestra su salida:</span>
+    <form class="demo-form" method="get" action="{{ url_for('v02_inyeccion_codigo') }}">
+      <input type="text" name="formula" value="__import__('subprocess').check_output(['id'])">
+      <button class="boton boton-sec" type="submit">Ejecutar</button>
+    </form>
+  </li>
+  <li>
+    <span class="ej-cap">Ataque con <code>os.system</code>: la página muestra <code>0</code>; la salida va a los logs:</span>
+    <form class="demo-form" method="get" action="{{ url_for('v02_inyeccion_codigo') }}">
+      <input type="text" name="formula" value="__import__('os').system('id')">
+      <button class="boton boton-sec" type="submit">Ejecutar</button>
+    </form>
+  </li>
+  <li>
+    <span class="ej-cap">Una instrucción, no una expresión: da <code>SyntaxError</code>:</span>
+    <form class="demo-form" method="get" action="{{ url_for('v02_inyeccion_codigo') }}">
+      <input type="text" name="formula" value="import os">
+      <button class="boton boton-sec" type="submit">Ejecutar</button>
+    </form>
+  </li>
+</ul>
 
 {% if error %}
 <p>Error:</p>
