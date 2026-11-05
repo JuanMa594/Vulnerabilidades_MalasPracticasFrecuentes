@@ -43,6 +43,25 @@ rtk git diff --no-index inseguro/app.py seguro/app.py
 - [RTK](https://github.com/rtk-ai/rtk) para ejecutar los comandos del proyecto.
 - Python 3.14 y [uv](https://docs.astral.sh/uv/) si vas a trabajar en el código fuera de Docker.
 
+## Stack del aplicativo
+
+| Capa | Tecnología |
+|---|---|
+| Lenguaje y runtime | Python 3.14 |
+| Backend | Flask 3.1 o superior |
+| Base de datos | PostgreSQL 18 |
+| Acceso a PostgreSQL | Psycopg 3.2 o superior (`psycopg[binary]`) |
+| Interfaz | HTML, CSS y JavaScript |
+| Plantillas | Jinja, integradas con Flask |
+| Administración de base de datos | pgAdmin 4 (imagen `dpage/pgadmin4:9.8`) |
+| Contenedores y servicios | Docker y Docker Compose |
+| Dependencias de Python | uv; versiones fijadas en `uv.lock` |
+| Calidad y pruebas de desarrollo | Ruff (formato y lint), ty (tipos) y pytest |
+
+Cada versión de la aplicación usa el mismo stack, pero se ejecuta en contenedores y con una base de
+datos independiente. Flask también sirve la interfaz: no hay una aplicación frontend ni un proceso
+de compilación separado.
+
 ## Iniciar la demo
 
 No necesitas crear un archivo `.env`: Compose usa valores predeterminados ficticios.

@@ -5,6 +5,15 @@ Registro de lo que se hace en cada sesión, por qué se hizo así y qué queda p
 
 ---
 
+## 2026-11-05 · Stack del aplicativo en el README
+
+Se agregó al `README.md` una sección con el stack completo: Python, Flask, PostgreSQL, Psycopg,
+HTML/CSS/JavaScript, Jinja, pgAdmin, Docker Compose, uv y las herramientas de desarrollo. También
+se aclaró que ambas versiones comparten tecnologías, pero mantienen contenedores y bases de datos
+independientes, y que Flask sirve la interfaz sin un frontend separado.
+
+---
+
 ## 2026-11-05 · README del proyecto
 
 Se creó `README.md` con la descripción de la demo, el catálogo V01–V09, los pasos para iniciar y
