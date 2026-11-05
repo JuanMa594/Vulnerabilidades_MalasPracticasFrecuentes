@@ -5,6 +5,15 @@ Registro de lo que se hace en cada sesión, por qué se hizo así y qué queda p
 
 ---
 
+## 2026-11-05 · README del proyecto
+
+Se creó `README.md` con la descripción de la demo, el catálogo V01–V09, los pasos para iniciar y
+detener ambas versiones, las direcciones locales, las credenciales ficticias de pgAdmin, los
+comandos de desarrollo y la estructura actual del repositorio. Se destacó que la versión insegura
+es intencional y debe usarse solo en local.
+
+---
+
 ## 2026-09-28 · Sesión 22: despliegue a prueba de estudiantes (sin .env)
 
 ### El problema
